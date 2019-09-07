@@ -149,7 +149,7 @@ func dSelFile(screen tcell.Screen, y int, index int, side int, dir int, normal i
 }
 
 func bar(screen tcell.Screen, text []string, schemes []Format, full tcell.Style, side int, top int, bottom int, location string) {
-	_, height := screen.Size()
+	width, height := screen.Size()
 	var y int
 	var x int
 	if location == "bottom" {
@@ -166,7 +166,7 @@ func bar(screen tcell.Screen, text []string, schemes []Format, full tcell.Style,
 		x += len(elem)
 	}
 
-	addstr(screen, full, x+side, y, rstrx(" ", width-x))
+	addstr(screen, full, x+side+1, y, rstrx(" ", width-x-(side*2)-1))
 }
 
 func main() {
@@ -203,7 +203,7 @@ func main() {
 	}
 	dispFiles(s, defScheme, mainList, top, bottom, side, dir, normal)
 	selFile(s, selStyle, side, currY, mainList[currFile])
-	bar(s, []string{"Hello","World"}, []Format{barStyle, barStyle}, side, top, bottom, "bottom")
+	bar(s, []string{"Hello","World"}, []Format{barStyle, barStyle}, tcell.StyleDefault.Background(tcell.GetColor("#0b4741")), side, top, bottom, "bottom")
 	s.Show()
 
 	for {
@@ -225,7 +225,7 @@ func main() {
 						s.Clear()
 						dispFiles(s, defScheme, mainList[b1:b2], top, bottom, side, dir, normal)
 						selFile(s, selStyle, side, currY, mainList[currFile])
-						bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
+						//bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
 						s.Show()
 					} else {
 						dSelFile(s, currY, currFile, side, dir, normal, mainList, defScheme)
@@ -244,7 +244,7 @@ func main() {
 						s.Clear()
 						dispFiles(s, defScheme, mainList[b1:b2], top, bottom, side, dir, normal)
 						selFile(s, selStyle, side, currY, mainList[currFile])
-						bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
+						//bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
 						s.Show()
 					} else {
 						dSelFile(s, currY, currFile, side, dir, normal, mainList, defScheme)
@@ -264,7 +264,7 @@ func main() {
 						if len(mainList) != 0 {
 							selFile(s, selStyle, side, currY, mainList[currFile])
 						}
-						bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
+						//bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
 						s.Show()
 					} else {
 						continue
@@ -277,7 +277,7 @@ func main() {
 					s.Clear()
 					dispFiles(s, defScheme, mainList, top, bottom, side, dir, normal)
 					selFile(s, selStyle, side, currY, mainList[currFile])
-					bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
+					//bar(s, []string{"Hello"}, []Format{barStyle}, side, top, bottom, "bottom")
 					s.Show()
 				}
 		}
