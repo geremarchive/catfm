@@ -20,20 +20,10 @@ var (
 	}
 
 	FileOpen = map[string]string {
-		"*": "vim,t",
-		"jpg": "sxiv,g",
-		"jpeg": "sxiv,g",
-		"png": "sxiv,g",
-		"gif": "sxiv,g",
-		"tiff": "sxiv,g",
+		"*": "vi,t",
 	}
 
 	FileColors = map[string]tcell.Style {
 		"[dir]": tcell.StyleDefault.Foreground(tcell.GetColor("#508cbe")).Bold(true),
-		"jpg": tcell.StyleDefault.Foreground(tcell.GetColor("#85678f")),
-		"jpeg": tcell.StyleDefault.Foreground(tcell.GetColor("#85678f")),
-		"png": tcell.StyleDefault.Foreground(tcell.GetColor("#85678f")),
-		"gif": tcell.StyleDefault.Foreground(tcell.GetColor("#85678f")),
-		"tiff": tcell.StyleDefault.Foreground(tcell.GetColor("#85678f")),
 	}
 )
