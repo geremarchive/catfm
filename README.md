@@ -39,3 +39,12 @@ Move into the ```lunae/``` directory and type ```go build```
 ## Configuration
 
 You can configure the program in the ```config/config.go``` file before compiling
+
+## Todo
+
+- [ ] Run program/script/command on keypress
+- [X] Run custom commands in the bar
+- [ ] Add hotkeys for directories
+- [ ] Add file searching
+- [ ] Add file renaming
+- [ ] Add ability to customize the keys for delete, move, copy, movement, etc.
