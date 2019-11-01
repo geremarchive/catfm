@@ -1,4 +1,4 @@
-# lunae
+i# lunae
 
 <img src="scrot.png" alt="scrot"/>
 
@@ -34,7 +34,7 @@ Lunae (pronounced loon-ay) is a simple file manager that aims to improve on the 
 
 Move into the ```lunae/``` directory and type ```go build```
 
-**Move the binary to somewhere in your path```
+**Move the binary to somewhere in your path**
 
 ## Configuration
 
