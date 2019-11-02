@@ -13,7 +13,7 @@ Info:
 More Info:
 
 ∙ <http://github.com/geremachek/lunae/>
-∙ <http://geremachek.io>
+∙ <http://geremachek.io/>
 
 */
 
@@ -59,25 +59,21 @@ func main() {
 	for {
 		nw, nh := s.Size()
 		if width != nw || height != nh {
-			s.Clear()
 			width, height = nw, nh
 			b1 = 0
 			b2 = (height-co.YBuffBottom)+co.YBuffTop
 			currY = co.YBuffTop
 			currFile = 0
-			fu.DispFiles(s, currFiles)
-			fu.DispBar(s, co.BarStyle, currFiles[currFile])
-			fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-			s.Show()
+			fu.DrawScreen(s, currFiles, currFile, currY)
 		}
 		input := s.PollEvent()
 		switch input := input.(type) {
 			case *tcell.EventKey:
-				if input.Rune() == 'q' {
+				if input.Rune() == co.KeyQuit {
 					s.Fini()
 					fmt.Print()
 					os.Exit(0)
-				} else if input.Rune() == 'd' {
+				} else if input.Rune() == co.KeyDelete {
 					os.RemoveAll(currFiles[currFile])
 					currFiles = fu.GetFiles(cwd, dot)
 					s.Clear()
@@ -100,7 +96,7 @@ func main() {
 						fu.DispBar(s, co.BarStyle, currFiles[currFile])
 					}
 					s.Show()
-				} else if input.Rune() == 'D' {
+				} else if input.Rune() == co.KeyGroupDelete {
 					for _, elem := range co.Selected {
 						os.RemoveAll(elem)
 						if strings.Contains(elem, cwd) {
@@ -127,12 +123,12 @@ func main() {
 					}
 					s.Show()
 					// This may be dangerous, but i don't really care :)
-				} else if input.Rune() == 'C' || input.Rune() == 'M' {
+				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove {
 					for _, elem := range co.Selected {
 						split := strings.Split(elem, "/")
-						if input.Rune() == 'C' {
+						if input.Rune() == co.KeyCopy {
 							fu.Copy(elem, cwd + "/" + split[len(split)-1])
-						} else if input.Rune() == 'M' {
+						} else if input.Rune() == co.KeyMove {
 							fu.Move(elem, cwd + "/" + split[len(split)-1])
 						}
 					}
@@ -147,7 +143,7 @@ func main() {
 					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 					fu.DispBar(s, co.BarStyle, currFiles[currFile])
 					s.Show()
-				} else if input.Rune() == ' ' {
+				} else if input.Rune() == co.KeySelect {
 					if fu.IsSel(cwd + "/" + currFiles[currFile]) {
 						index, _ := fu.In(cwd + "/" + currFiles[currFile], co.Selected)
 						co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
@@ -157,19 +153,15 @@ func main() {
 					fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + "  ")
 					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 					s.Show()
-				} else if input.Rune() == '.' {
+				} else if input.Rune() == co.KeyDotToggle {
 					dot = !(dot)
 					currFiles = fu.GetFiles(cwd, dot)
 					b1 = 0
 					b2 = (height-co.YBuffBottom)+co.YBuffTop
 					currFile = 0
 					currY = co.YBuffTop
-					s.Clear()
-					fu.DispFiles(s, currFiles)
-					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-					fu.DispBar(s, co.BarStyle, currFiles[currFile])
-					s.Show()
-				} else if input.Key() == tcell.KeyDown && len(currFiles) != 0 {
+					fu.DrawScreen(s, currFiles, currFile, currY)
+				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currFiles) != 0 {
 					if currFile == len(currFiles)-1 {
 						continue
 					} else if currY == (height-1)-co.YBuffBottom {
@@ -180,11 +172,7 @@ func main() {
 							b2 += 1
 						}
 						currFile += 1
-						s.Clear()
-						fu.DispFiles(s, currFiles[b1:b2])
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
-						s.Show()
+						fu.DrawScreen(s, currFiles, currFile, currY)
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY += 1
@@ -194,18 +182,14 @@ func main() {
 						s.Show()
 					}
 
-				} else if input.Key() == tcell.KeyUp && len(currFiles) != 0 {
+				} else if (input.Key() == tcell.KeyUp || input.Rune() == co.KeyUp) && len(currFiles) != 0 {
 					if currFile == 0 {
 						continue
 					} else if currY == co.YBuffTop {
 						b1 -= 1
 						b2 -= 1
 						currFile -= 1
-						s.Clear()
-						fu.DispFiles(s, currFiles[b1:b2])
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
-						s.Show()
+						fu.DrawScreen(s, currFiles, currFile, currY)
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY -= 1
@@ -215,7 +199,7 @@ func main() {
 						s.Show()
 
 					}
-				} else if input.Key() == tcell.KeyRight && len(currFiles) != 0 {
+				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
 					if fu.Isd(currFiles[currFile]) {
 						os.Chdir(currFiles[currFile])
 						cwd, _ = os.Getwd()
@@ -256,7 +240,7 @@ func main() {
 							cmd.Start()
 						}
 					}
-				} else if input.Key() == tcell.KeyLeft {
+				} else if input.Key() == tcell.KeyLeft || input.Rune() == co.KeyLeft {
 					os.Chdir("..")
 					cwd, _ = os.Getwd()
 					currFiles = fu.GetFiles(cwd, dot)
@@ -264,11 +248,25 @@ func main() {
 					b2 = (height-co.YBuffBottom)+co.YBuffTop
 					currFile = 0
 					currY = co.YBuffTop
-					s.Clear()
-					fu.DispFiles(s, currFiles)
-					fu.DispBar(s, co.BarStyle, currFiles[currFile])
-					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-					s.Show()
+					fu.DrawScreen(s, currFiles, currFile, currY)
+				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
+					currFiles = fu.GetFiles(cwd, dot)
+					fu.DrawScreen(s, currFiles, currFile, currY)
+				} else {
+					for k, v := range co.Bindings {
+						if k == input.Rune() {
+							if v[0] == "cd" {
+								os.Chdir(strings.Replace(string(v[1]), "~", os.Getenv("HOME"), -1))
+								cwd, _ = os.Getwd()
+								currFiles = fu.GetFiles(cwd, dot)
+								b1 = 0
+								b2 = (height-co.YBuffBottom)+co.YBuffTop
+								currFile = 0
+								currY = co.YBuffTop
+								fu.DrawScreen(s, currFiles, currFile, currY)
+							}
+						}
+					}
 				}
 		}
 	}

@@ -210,3 +210,11 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 	}
 	barLen = x
 }
+
+func DrawScreen(s tcell.Screen, currFs []string, currF int, y int) {
+	s.Clear()
+	DispFiles(s, currFs)
+	DispBar(s, co.BarStyle, currFs[currF])
+	SelFile(s, co.XBuff, y, currFs[currF])
+	s.Show()
+}
