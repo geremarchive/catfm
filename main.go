@@ -172,7 +172,11 @@ func main() {
 							b2 += 1
 						}
 						currFile += 1
-						fu.DrawScreen(s, currFiles, currFile, currY)
+						s.Clear()
+						fu.DispFiles(s, currFiles[b1:b2])
+						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
+						fu.DispBar(s, co.BarStyle, currFiles[currFile])
+						s.Show()
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY += 1
@@ -189,7 +193,11 @@ func main() {
 						b1 -= 1
 						b2 -= 1
 						currFile -= 1
-						fu.DrawScreen(s, currFiles, currFile, currY)
+						s.Clear()
+						fu.DispFiles(s, currFiles[b1:b2])
+						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
+						fu.DispBar(s, co.BarStyle, currFiles[currFile])
+						s.Show()
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY -= 1
