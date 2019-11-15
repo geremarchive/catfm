@@ -58,7 +58,10 @@ func main() {
 
 	for {
 		nw, nh := s.Size()
-		if width != nw || height != nh {
+		if width != nw {
+			width, height = nw, nh
+			fu.DrawScreen(s, currFiles, currFile, currY)
+		} else if height != nh {
 			width, height = nw, nh
 			b1 = 0
 			b2 = (height-co.YBuffBottom)+co.YBuffTop
