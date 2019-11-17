@@ -211,9 +211,13 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 	barLen = x
 }
 
-func DrawScreen(s tcell.Screen, currFs []string, currF int, y int) {
+func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf2 int) {
 	s.Clear()
-	DispFiles(s, currFs)
+	if buf1 == 0 {
+		DispFiles(s, currFs)
+	} else {
+		DispFiles(s, currFs[buf1:buf2])
+	}
 	DispBar(s, co.BarStyle, currFs[currF])
 	SelFile(s, co.XBuff, y, currFs[currF])
 	s.Show()

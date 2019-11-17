@@ -60,14 +60,14 @@ func main() {
 		nw, nh := s.Size()
 		if width != nw {
 			width, height = nw, nh
-			fu.DrawScreen(s, currFiles, currFile, currY)
+			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 		} else if height != nh {
 			width, height = nw, nh
 			b1 = 0
 			b2 = (height-co.YBuffBottom)+co.YBuffTop
 			currY = co.YBuffTop
 			currFile = 0
-			fu.DrawScreen(s, currFiles, currFile, currY)
+			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 		}
 		input := s.PollEvent()
 		switch input := input.(type) {
@@ -163,7 +163,7 @@ func main() {
 					b2 = (height-co.YBuffBottom)+co.YBuffTop
 					currFile = 0
 					currY = co.YBuffTop
-					fu.DrawScreen(s, currFiles, currFile, currY)
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currFiles) != 0 {
 					if currFile == len(currFiles)-1 {
 						continue
@@ -175,11 +175,7 @@ func main() {
 							b2 += 1
 						}
 						currFile += 1
-						s.Clear()
-						fu.DispFiles(s, currFiles[b1:b2])
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
-						s.Show()
+						fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY += 1
@@ -196,11 +192,7 @@ func main() {
 						b1 -= 1
 						b2 -= 1
 						currFile -= 1
-						s.Clear()
-						fu.DispFiles(s, currFiles[b1:b2])
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
-						s.Show()
+						fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 					} else {
 						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
 						currY -= 1
@@ -243,10 +235,7 @@ func main() {
 							cmd.Run()
 							s, _ = tcell.NewScreen()
 							s.Init()
-							fu.DispFiles(s, currFiles)
-							fu.DispBar(s, co.BarStyle, currFiles[currFile])
-							fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-							s.Show()
+							fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 						} else if command[1] == "g" {
 							cmd.Start()
 						}
@@ -259,10 +248,10 @@ func main() {
 					b2 = (height-co.YBuffBottom)+co.YBuffTop
 					currFile = 0
 					currY = co.YBuffTop
-					fu.DrawScreen(s, currFiles, currFile, currY)
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
 					currFiles = fu.GetFiles(cwd, dot)
-					fu.DrawScreen(s, currFiles, currFile, currY)
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else {
 					for k, v := range co.Bindings {
 						if k == input.Rune() {
@@ -274,7 +263,7 @@ func main() {
 								b2 = (height-co.YBuffBottom)+co.YBuffTop
 								currFile = 0
 								currY = co.YBuffTop
-								fu.DrawScreen(s, currFiles, currFile, currY)
+								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							}
 						}
 					}
