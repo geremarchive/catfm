@@ -264,6 +264,18 @@ func main() {
 								currFile = 0
 								currY = co.YBuffTop
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+							} else if v[0] == "t" {
+								cmd := exec.Command(v[1], currFiles[currFile])
+								cmd.Stdout = os.Stdout
+								cmd.Stdin = os.Stdin
+								s.Fini()
+								cmd.Run()
+								s, _ = tcell.NewScreen()
+								s.Init()
+								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+							} else if v[0] == "g" {
+								cmd := exec.Command(v[1], currFiles[currFile])
+								cmd.Start()
 							}
 						}
 					}

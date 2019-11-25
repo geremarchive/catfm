@@ -1,7 +1,7 @@
 /*
 
 +--------------------------+
-| Lune Configuration File. |
+| Lunae Configuration File. |
 +--------------------------+
 
 */
@@ -30,6 +30,7 @@ var (
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
 
+	BarLocation string = "top"
 	BarBg tcell.Color = tcell.GetColor("#ffffff")
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
@@ -55,7 +56,8 @@ var (
 	}
 
 	Bindings = map[rune][]string {
-		'1': []string{"cd", "~"}, // "cd" into the home directory when the user presses 1
+		'1': []string{"cd", "~"}, // "cd" into the home directory when the user presses '1'
+		'v': []string{"t", "less"}, // View the selected file in less when 'v' is pressed
 	}
 
 	Selected []string
