@@ -1,4 +1,4 @@
-# lunae ☾
+# lunae
 
 <img src="scrot.png" alt="scrot"/>
 
@@ -44,7 +44,7 @@ You can configure the program in the ```config/config.go``` file before compilin
 
 shell function (put this in your ```.shellrc```):
 
-```
+```bash
 lu() {
 	lunae
 	cd "$(< /tmp/lunar)"
