@@ -23,7 +23,6 @@ import (
 	"github.com/gdamore/tcell"
 	"os"
 	"os/exec"
-	"fmt"
 	"strings"
 	fu "./funcs"
 	co "./config"
@@ -74,7 +73,9 @@ func main() {
 			case *tcell.EventKey:
 				if input.Rune() == co.KeyQuit {
 					s.Fini()
-					fmt.Print()
+					file, _ := os.Create("/tmp/lunar")
+					file.WriteString(cwd)
+					file.Close()
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
 					os.RemoveAll(currFiles[currFile])
