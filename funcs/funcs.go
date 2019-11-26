@@ -117,15 +117,31 @@ func DispFiles(s tcell.Screen, files []string) {
 }
 
 func SelFile(s tcell.Screen, x int, y int, file string) {
-	Addstr(s, tcell.StyleDefault.Reverse(true), x, y, FormatText(s, file))
+	formated := FormatText(s, file)
+	width, _ := s.Size()
+	var extra string
+
+	if co.SelectFull {
+		extra = strings.Repeat(" ", width-(len(formated)+(co.XBuff*2)))
+	}
+
+	Addstr(s, tcell.StyleDefault.Reverse(true), x, y, FormatText(s, file) + extra)
 }
 
 func DSelFile(s tcell.Screen, x int, y int, file string) {
+	formated := FormatText(s, file)
 	splitFile := strings.Split(file, ".")
+	width, _ := s.Size()
+	var extra string
+
+	if co.SelectFull {
+		extra = strings.Repeat(" ", width-(len(formated)+(co.XBuff*2)))
+	}
+
 	if Isd(file) {
-		Addstr(s, co.FileColors["[dir]"], x, y, FormatText(s, file))
+		Addstr(s, co.FileColors["[dir]"], x, y, FormatText(s, file) + extra)
 	} else {
-		Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, FormatText(s, file))
+		Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, FormatText(s, file) + extra)
 	}
 }
 

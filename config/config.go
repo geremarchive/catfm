@@ -45,6 +45,8 @@ var (
 		"3mode": tcell.StyleDefault.Background(BarBg),
 	}
 
+	SelectFull bool = false // The whole line is selected
+
 	FileOpen = map[string][]string {
 		// Key is the file type, formatted like "jpg"
 		// Value is the program,t/g. "t" for terminal, "g" for gui
