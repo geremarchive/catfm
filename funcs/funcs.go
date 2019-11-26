@@ -26,13 +26,6 @@ func In(item string, array []string) (int, bool) {
 	return 0, false
 }
 
-func Pstrx(str string, x int) (out string) {
-	for i := 0; i < x; i++ {
-		out += str
-	}
-	return out
-}
-
 func GetFiles(path string, dot bool) ([]string) {
 	var d []string
 	var f []string
@@ -166,11 +159,39 @@ func Move(src, dst string) {
 	os.RemoveAll(src)
 }
 
+/*func Msgnread(s tcell.Screen, message string) {
+	_, y := s.Size()
+
+	Addstr(s, tcell.StyleDefault, co.XBuff, y-(co.YBuffBottom)+1, strings.Repeat(" ", barLen))
+	Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), co.XBuff, y-(co.YBuffBottom)+1, message)
+	s.Show()
+
+	barLen = co.XBuff + len(message)
+
+	//var text string
+	var currX int = co.XBuff + len(message) + 1
+
+	s.ShowCursor(currX, y-(YBuffBottom)+1)
+	s.Show()
+
+	for {
+		input := s.PollEvent()
+		switch input := input.(type) {
+			case *tcell.EventKey:
+				if input.Key() == 
+				Addstr(s ,tcell.StyleDefault, currX, y-(co.YBuffBottom)+1, string(input.Rune()))
+				currX += 1
+				s.ShowCursor(currX, y-(co.YBuffBottom)+1)
+				s.Show()
+		}
+	}
+}*/
+
 func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 	var x int = co.XBuff
 	var elemOutput string
 	width, y := s.Size()
-	Addstr(s, tcell.StyleDefault, co.XBuff, y-(co.YBuffBottom)+1, Pstrx(" ", barLen))
+	Addstr(s, tcell.StyleDefault, co.XBuff, y-(co.YBuffBottom)+1, strings.Repeat(" ", barLen))
 
 	keys := make([]string, len(elements))
 

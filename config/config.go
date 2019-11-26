@@ -29,6 +29,7 @@ var (
 	KeyDown rune = 'j'
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
+	//KeyRename rune = 'r'
 
 	BarLocation string = "top"
 	BarBg tcell.Color = tcell.GetColor("#ffffff")
@@ -44,11 +45,11 @@ var (
 		"3mode": tcell.StyleDefault.Background(BarBg),
 	}
 
-	FileOpen = map[string]string {
+	FileOpen = map[string][]string {
 		// Key is the file type, formatted like "jpg"
 		// Value is the program,t/g. "t" for terminal, "g" for gui
 
-		"*": "vi,t", // vi, a terminal program will open all files.
+		"*": []string{"t", "vi @"}, // vi, a terminal program will open all files. (the '@' symbol will be replaced with the currently selected file)
 	}
 
 	FileColors = map[string]tcell.Style {
@@ -57,7 +58,7 @@ var (
 
 	Bindings = map[rune][]string {
 		'1': []string{"cd", "~"}, // "cd" into the home directory when the user presses '1'
-		'v': []string{"t", "less"}, // View the selected file in less when 'v' is pressed
+		'v': []string{"t", "less @"}, // View the selected file in less when 'v' is pressed
 	}
 
 	Selected []string

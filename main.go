@@ -8,7 +8,7 @@ Info:
 
 ∙ This project was created and is maintained by geremachek (gmk).
 ∙ Lunae is registered under the GPL v. 3 witch means you are free to modify and distribute it and its source code
-∙ This project was based on the now deprecated pluto project and shares a lot of the core design ideas from that project
+∙ This project was based on the now deprecated pluto project and shares a lot of the core design ideas as this project
 
 More Info:
 
@@ -220,16 +220,17 @@ func main() {
 						}
 						s.Show()
 					} else {
-						var command []string = strings.Split(co.FileOpen["*"], ",")
+						var command []string = co.FileOpen["*"]
 						splitFile := strings.Split(currFiles[currFile], ".")
 						for k, v := range co.FileOpen {
 							if k == splitFile[len(splitFile)-1] {
-								command = strings.Split(v, ",")
+								command = v
 								break
 							}
 						}
-						cmd := exec.Command(command[0], currFiles[currFile])
-						if command[1] == "t" {
+						replacedString := strings.Replace(command[1], "@", currFiles[currFile], -1)
+						cmd := exec.Command("dash", "-c", replacedString)
+						if command[0] == "t" {
 							cmd.Stdout = os.Stdout
 							cmd.Stdin = os.Stdin
 							s.Fini()
@@ -237,7 +238,7 @@ func main() {
 							s, _ = tcell.NewScreen()
 							s.Init()
 							fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
-						} else if command[1] == "g" {
+						} else if command[0] == "g" {
 							cmd.Start()
 						}
 					}
@@ -256,6 +257,7 @@ func main() {
 				} else {
 					for k, v := range co.Bindings {
 						if k == input.Rune() {
+							replacedString := strings.Replace(v[1], "@", currFiles[currFile], -1)
 							if v[0] == "cd" {
 								os.Chdir(strings.Replace(string(v[1]), "~", os.Getenv("HOME"), -1))
 								cwd, _ = os.Getwd()
@@ -266,7 +268,7 @@ func main() {
 								currY = co.YBuffTop
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							} else if v[0] == "t" {
-								cmd := exec.Command(v[1], currFiles[currFile])
+								cmd := exec.Command("dash", "-c", replacedString)
 								cmd.Stdout = os.Stdout
 								cmd.Stdin = os.Stdin
 								s.Fini()
@@ -275,7 +277,7 @@ func main() {
 								s.Init()
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							} else if v[0] == "g" {
-								cmd := exec.Command(v[1], currFiles[currFile])
+								cmd := exec.Command("dash", "-c", replacedString)
 								cmd.Start()
 							}
 						}
