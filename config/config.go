@@ -20,7 +20,6 @@ var (
 	KeyRefresh rune = 'f'
 	KeyQuit rune = 'q'
 	KeyDelete rune = 'd'
-	KeyGroupDelete rune = 'D'
 	KeyCopy rune = 'C'
 	KeyMove rune = 'M'
 	KeySelect rune = ' '
