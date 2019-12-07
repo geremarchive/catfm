@@ -273,3 +273,14 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 	SelFile(s, co.XBuff, y, currFs[currF])
 	s.Show()
 }
+
+func Itemi(item string, slice []string) (out int) {
+	for index, elem := range slice {
+		if elem == item {
+			out = index
+			break
+		}
+	}
+
+	return
+}

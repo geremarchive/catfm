@@ -100,32 +100,6 @@ func main() {
 						fu.DispBar(s, co.BarStyle, currFiles[currFile])
 					}
 					s.Show()
-				} else if input.Rune() == co.KeyGroupDelete {
-					for _, elem := range co.Selected {
-						os.RemoveAll(elem)
-						if strings.Contains(elem, cwd) {
-							currFile -= 1
-							if b1 != 0 {
-								b1 -= 1
-								b2 -= 1
-							} else {
-								currY -= 1
-							}
-						}
-					}
-					co.Selected = []string{}
-					currFiles = fu.GetFiles(cwd, dot)
-					s.Clear()
-					if b1 == 0 {
-						fu.DispFiles(s, currFiles)
-					} else {
-						fu.DispFiles(s, currFiles[b1:b2])
-					}
-					if len(currFiles) != 0 {
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
-					}
-					s.Show()
 					// This may be dangerous, but i don't really care :)
 				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove {
 					for _, elem := range co.Selected {
