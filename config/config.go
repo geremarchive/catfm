@@ -45,7 +45,7 @@ var (
 		"3mode": tcell.StyleDefault.Background(BarBg),
 	}
 
-	SelectType string = "default" // full, default, arrow
+	SelectType string = "arrow-default" // full, default, arrow, arrow-default
 	SelectStyle tcell.Style = tcell.StyleDefault.Reverse(true)
 	SelectArrow string = "> "
 	SelectArrowStyle tcell.Style = tcell.StyleDefault.Bold(true)

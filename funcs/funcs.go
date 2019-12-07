@@ -123,13 +123,17 @@ func SelFile(s tcell.Screen, x int, y int, file string) {
 
 	if co.SelectType == "full" {
 		Addstr(s, co.SelectStyle, x, y, formated + strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
-	} else if co.SelectType == "arrow" {
+	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
 		Addstr(s, co.SelectArrowStyle, x, y, co.SelectArrow)
 
-		if Isd(file) {
-			Addstr(s, co.FileColors["[dir]"], x+len(co.SelectArrow), y, formated)
+		if co.SelectType == "arrow-default" {
+			Addstr(s, co.SelectStyle, x+len(co.SelectArrow), y, formated)
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, FormatText(s, file))
+			if Isd(file) {
+				Addstr(s, co.FileColors["[dir]"], x+len(co.SelectArrow), y, formated)
+			} else {
+				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, FormatText(s, file))
+			}
 		}
 	} else if co.SelectType == "default" {
 		Addstr(s, co.SelectStyle, x, y, formated)
@@ -144,7 +148,7 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 	if co.SelectType == "full" {
 		Addstr(s, co.FileColors["[dir]"], x, y, formated)
 		Addstr(s, tcell.StyleDefault, x+len(formated), y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
-	} else if co.SelectType == "arrow" {
+	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
 		if Isd(file) {
 			Addstr(s, co.FileColors["[dir]"], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
 		} else {

@@ -1,4 +1,4 @@
-# 「lunae」
+# lunae 🌙
 
 <img src="scrot.png" alt="scrot"/>
 
@@ -10,6 +10,7 @@ Lunae (pronounced loon-ay) is a simple file manager that aims to improve on the 
 
 * ```go```
 * ```tcell```
+* ```bytefmt```
 * ```dash```
 
 ## Building
@@ -29,6 +30,10 @@ Lunae (pronounced loon-ay) is a simple file manager that aims to improve on the 
 **Install tcell:**
 
 ```go get github.com/gdamore/tcell```
+
+**Install bytefmt***
+
+```go get code.cloudfoundry.org/bytefmt```
 
 **Build the program**
 
