@@ -118,30 +118,40 @@ func DispFiles(s tcell.Screen, files []string) {
 
 func SelFile(s tcell.Screen, x int, y int, file string) {
 	formated := FormatText(s, file)
+	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
-	var extra string
 
-	if co.SelectFull {
-		extra = strings.Repeat(" ", width-(len(formated)+(co.XBuff*2)))
+	if co.SelectType == "full" {
+		Addstr(s, co.SelectStyle, x, y, formated + strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
+	} else if co.SelectType == "arrow" {
+		Addstr(s, co.SelectArrowStyle, x, y, co.SelectArrow)
+
+		if Isd(file) {
+			Addstr(s, co.FileColors["[dir]"], x+len(co.SelectArrow), y, formated)
+		} else {
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, FormatText(s, file))
+		}
+	} else if co.SelectType == "default" {
+		Addstr(s, co.SelectStyle, x, y, formated)
 	}
-
-	Addstr(s, tcell.StyleDefault.Reverse(true), x, y, FormatText(s, file) + extra)
 }
 
 func DSelFile(s tcell.Screen, x int, y int, file string) {
 	formated := FormatText(s, file)
 	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
-	var extra string
 
-	if co.SelectFull {
-		extra = strings.Repeat(" ", width-(len(formated)+(co.XBuff*2)))
-	}
-
-	if Isd(file) {
-		Addstr(s, co.FileColors["[dir]"], x, y, FormatText(s, file) + extra)
-	} else {
-		Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, FormatText(s, file) + extra)
+	if co.SelectType == "full" {
+		Addstr(s, co.FileColors["[dir]"], x, y, formated)
+		Addstr(s, tcell.StyleDefault, x+len(formated), y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
+	} else if co.SelectType == "arrow" {
+		if Isd(file) {
+			Addstr(s, co.FileColors["[dir]"], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
+		} else {
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
+		}
+	} else if co.SelectType == "default" {
+		Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
 	}
 }
 

@@ -45,7 +45,10 @@ var (
 		"3mode": tcell.StyleDefault.Background(BarBg),
 	}
 
-	SelectFull bool = false // The whole line is selected
+	SelectType string = "default" // full, default, arrow
+	SelectStyle tcell.Style = tcell.StyleDefault.Reverse(true)
+	SelectArrow string = "> "
+	SelectArrowStyle tcell.Style = tcell.StyleDefault.Bold(true)
 
 	FileOpen = map[string][]string {
 		// Key is the file type, formatted like "jpg"

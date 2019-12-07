@@ -8,7 +8,7 @@ Info:
 
 ∙ This project was created and is maintained by geremachek (gmk).
 ∙ Lunae is registered under the GPL v. 3 witch means you are free to modify and distribute it and its source code
-∙ This project was based on the now deprecated pluto project and shares a lot of the core design ideas as this project
+∙ This project was based on the now deprecated pluto file-manager and shares a lot of the core design ideas of that file-manager
 
 More Info:
 
@@ -57,10 +57,10 @@ func main() {
 
 	for {
 		nw, nh := s.Size()
-		if width != nw {
+		if width != nw && height == nh {
 			width, height = nw, nh
 			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
-		} else if height != nh {
+		} else if height != nh && width != nh {
 			width, height = nw, nh
 			b1 = 0
 			b2 = (height-co.YBuffBottom)+co.YBuffTop
