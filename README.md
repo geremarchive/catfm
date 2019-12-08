@@ -2,7 +2,7 @@
 
 <p align="center">lunae (pronounced loon-ay) is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 <br><br>
-<img align="center" src="scrot.png" alt="scrot"/>
+<img align="center" src="scrot.png" alt="scrot"></img>
 
 ## Dependencies 
 
