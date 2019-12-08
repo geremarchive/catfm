@@ -24,7 +24,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"fmt"
 	fu "./funcs"
 	co "./config"
 )
@@ -77,7 +76,6 @@ func main() {
 					file, _ := os.Create("/tmp/lunar")
 					file.WriteString(cwd)
 					file.Close()
-					fmt.Println(b1, b2)
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
 					os.RemoveAll(currFiles[currFile])
