@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"fmt"
 	fu "./funcs"
 	co "./config"
 )
@@ -49,7 +50,7 @@ func main() {
 	s.Init()
 	width, height = s.Size()
 
-	b2 = (height-co.YBuffBottom)//+co.YBuffTop
+	b2 = (height-co.YBuffBottom)
 	fu.DispFiles(s, currFiles)
 	fu.DispBar(s, co.BarStyle, currFiles[currFile])
 	fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
@@ -76,6 +77,7 @@ func main() {
 					file, _ := os.Create("/tmp/lunar")
 					file.WriteString(cwd)
 					file.Close()
+					fmt.Println(b1, b2)
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
 					os.RemoveAll(currFiles[currFile])

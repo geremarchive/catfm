@@ -100,7 +100,7 @@ func DispFiles(s tcell.Screen, files []string) {
 	_, height := s.Size()
 	if len(files) != 0 {
 		for i, f := range files {
-			if i+co.YBuffTop != (height - co.YBuffBottom) {
+			if i+co.YBuffTop < (height - co.YBuffBottom) {
 				splitFile := strings.Split(f, ".")
 				if Isd(f) {
 					Addstr(s, co.FileColors["[dir]"], co.XBuff, i+co.YBuffTop, FormatText(s, f))
@@ -267,7 +267,7 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 	if buf1 == 0 {
 		DispFiles(s, currFs)
 	} else {
-		DispFiles(s, currFs[buf1:buf2])
+		DispFiles(s, currFs[buf1:buf2+1])
 	}
 	DispBar(s, co.BarStyle, currFs[currF])
 	SelFile(s, co.XBuff, y, currFs[currF])
