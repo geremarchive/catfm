@@ -2,9 +2,9 @@
 
 <p align="center">lunae is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 
-<img align="left" src="logo.png">
+<p align="center"><img src="logo.png"></p>
 
-<img align="right" src="scrot.png">
+<p align="center"><img src="scrot.png"></p>
 
 ## Dependencies 
 
