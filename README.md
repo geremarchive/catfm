@@ -1,7 +1,8 @@
 <h1 align="center">lunae 🌙</h1>
 
-<p align="center">lunae is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 <p align="center"><img height="250" src="logo.png"></p>
+
+<p align="center">lunae is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 
 <img align="right" src="scrot.png">
 
