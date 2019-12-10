@@ -1,7 +1,7 @@
 package funcs
 
 import (
-	co "../config"
+	co "lunae/config"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
 	"io"
@@ -146,7 +146,6 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 	width, _ := s.Size()
 
 	if co.SelectType == "full" {
-		Addstr(s, co.FileColors["[dir]"], x, y, formated)
 		Addstr(s, tcell.StyleDefault, x+len(formated), y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
 	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
 		if Isd(file) {
@@ -155,7 +154,11 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
 		}
 	} else if co.SelectType == "default" {
-		Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
+		if Isd(file) {
+			Addstr(s, co.FileColors["[dir]"], x, y, formated)
+		} else {
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
+		}
 	}
 }
 

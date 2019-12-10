@@ -24,8 +24,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	fu "./funcs"
-	co "./config"
+	fu "lunae/funcs"
+	co "lunae/config"
 )
 
 var (
