@@ -30,8 +30,7 @@ var (
 	KeyRight rune = 'l'
 	//KeyRename rune = 'r'
 
-	BarLocation string = "top"
-	BarBg tcell.Color = tcell.GetColor("#ffffff")
+	BarBg tcell.Color = tcell.ColorBlue
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
 	BarStyle = map[string]tcell.Style{

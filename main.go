@@ -51,8 +51,10 @@ func main() {
 
 	b2 = (height-co.YBuffBottom)
 	fu.DispFiles(s, currFiles)
-	fu.DispBar(s, co.BarStyle, currFiles[currFile])
-	fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
+	if len(currFiles) != 0 {
+		fu.DispBar(s, co.BarStyle, currFiles[currFile])
+		fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
+	}
 	s.Show()
 
 	for {
@@ -128,7 +130,11 @@ func main() {
 					} else {
 						co.Selected = append(co.Selected, cwd + "/" + currFiles[currFile])
 					}
-					fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + "  ")
+					if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
+						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + strings.Repeat(" ", len(co.SelectArrow)+1))
+					} else {
+						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + " ")
+					}
 					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 					s.Show()
 				} else if input.Rune() == co.KeyDotToggle {
@@ -179,6 +185,10 @@ func main() {
 					}
 				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
 					if fu.Isd(currFiles[currFile]) {
+						/*oldB1, oldB2 = b1, b2
+						oldCurrFile = currFile
+						oldFileName = currFiles[currFile]
+						oldCurrY = */
 						os.Chdir(currFiles[currFile])
 						cwd, _ = os.Getwd()
 						currFiles = fu.GetFiles(cwd, dot)

@@ -112,7 +112,7 @@ func DispFiles(s tcell.Screen, files []string) {
 			}
 		}
 	} else {
-		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, FormatText(s, "[EMPTY]"))
+		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, FormatText(s, "EMPTY"))
 	}
 }
 
@@ -151,7 +151,7 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 		if Isd(file) {
 			Addstr(s, co.FileColors["[dir]"], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
 		}
 	} else if co.SelectType == "default" {
 		if Isd(file) {
