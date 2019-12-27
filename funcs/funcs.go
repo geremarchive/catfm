@@ -4,7 +4,6 @@ import (
 	co "lunae/config"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
-	"io"
 	"sort"
 	"os"
 	"os/exec"
@@ -166,59 +165,6 @@ func IsSel(path string) bool {
 	_, in := In(path, co.Selected)
 	return in
 }
-
-func Copy(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	return out.Close()
-}
-
-func Move(src, dst string) {
-	Copy(src, dst)
-	os.RemoveAll(src)
-}
-
-/*func Msgnread(s tcell.Screen, message string) {
-	_, y := s.Size()
-
-	Addstr(s, tcell.StyleDefault, co.XBuff, y-(co.YBuffBottom)+1, strings.Repeat(" ", barLen))
-	Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), co.XBuff, y-(co.YBuffBottom)+1, message)
-	s.Show()
-
-	barLen = co.XBuff + len(message)
-
-	//var text string
-	var currX int = co.XBuff + len(message) + 1
-
-	s.ShowCursor(currX, y-(YBuffBottom)+1)
-	s.Show()
-
-	for {
-		input := s.PollEvent()
-		switch input := input.(type) {
-			case *tcell.EventKey:
-				if input.Key() == 
-				Addstr(s ,tcell.StyleDefault, currX, y-(co.YBuffBottom)+1, string(input.Rune()))
-				currX += 1
-				s.ShowCursor(currX, y-(co.YBuffBottom)+1)
-				s.Show()
-		}
-	}
-}*/
 
 func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 	var x int = co.XBuff

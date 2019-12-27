@@ -20,15 +20,19 @@ var (
 	KeyRefresh rune = 'f'
 	KeyQuit rune = 'q'
 	KeyDelete rune = 'd'
+	KeyBulkDelete rune = 'D'
 	KeyCopy rune = 'C'
 	KeyMove rune = 'M'
 	KeySelect rune = ' '
+	KeySelectAll rune = '*'
+	KeyDeselectAll rune = '-'
 	KeyDotToggle rune = '.'
+	KeyGoToFirst rune = 'g'
+	KeyGoToLast rune = 'G'
 	KeyLeft rune = 'h'
 	KeyDown rune = 'j'
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
-	//KeyRename rune = 'r'
 
 	BarBg tcell.Color = tcell.ColorBlue
 	BarFg tcell.Color = tcell.GetColor("#000000")

@@ -24,8 +24,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"fmt"
 	fu "lunae/funcs"
 	co "lunae/config"
+	cp "github.com/otiai10/copy"
 )
 
 var (
@@ -75,14 +77,25 @@ func main() {
 			case *tcell.EventKey:
 				if input.Rune() == co.KeyQuit {
 					s.Fini()
+
 					file, _ := os.Create("/tmp/lunar")
 					file.WriteString(cwd)
 					file.Close()
+
+					fmt.Println(b1, b2, currFile)
+
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
 					os.RemoveAll(currFiles[currFile])
-					currFiles = fu.GetFiles(cwd, dot)
+
+					if index, in := fu.In(currFiles[currFile], co.Selected); in {
+						co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
+					}
+
+					currFiles = append(currFiles[:currFile], currFiles[currFile+1:]...)
+
 					s.Clear()
+
 					if currFile == len(currFiles) && b1 == 0 {
 						currY -= 1
 						currFile -= 1
@@ -102,27 +115,28 @@ func main() {
 						fu.DispBar(s, co.BarStyle, currFiles[currFile])
 					}
 					s.Show()
-					// This may be dangerous, but i don't really care :)
-				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove {
+				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
 					for _, elem := range co.Selected {
 						split := strings.Split(elem, "/")
 						if input.Rune() == co.KeyCopy {
-							fu.Copy(elem, cwd + "/" + split[len(split)-1])
+							cp.Copy(elem, cwd + "/" + split[len(split)-1])
 						} else if input.Rune() == co.KeyMove {
-							fu.Move(elem, cwd + "/" + split[len(split)-1])
+							cp.Copy(elem, cwd + "/" + split[len(split)-1])
+							os.RemoveAll(elem)
+						} else if input.Rune() == co.KeyBulkDelete {
+							os.RemoveAll(elem)
 						}
 					}
+
 					co.Selected = []string{}
 					currFiles = fu.GetFiles(cwd, dot)
-					s.Clear()
-					if b1 == 0 {
-						fu.DispFiles(s, currFiles)
-					} else {
-							fu.DispFiles(s, currFiles[b1:b2])
-					}
-					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-					fu.DispBar(s, co.BarStyle, currFiles[currFile])
-					s.Show()
+
+					currY = co.YBuffTop
+					currFile = 0
+
+					b1, b2 = 0, height - co.YBuffBottom
+
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if input.Rune() == co.KeySelect {
 					if fu.IsSel(cwd + "/" + currFiles[currFile]) {
 						index, _ := fu.In(cwd + "/" + currFiles[currFile], co.Selected)
@@ -137,6 +151,18 @@ func main() {
 					}
 					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 					s.Show()
+				} else if input.Rune() == co.KeySelectAll {
+					for _, elem := range currFiles {
+						if _, in := fu.In(cwd + "/" + elem, co.Selected); !in {
+							co.Selected = append(co.Selected, cwd + "/" + elem)
+						}
+					}
+
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+				} else if input.Rune() == co.KeyDeselectAll {
+					co.Selected = []string{}
+
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if input.Rune() == co.KeyDotToggle {
 					dot = !(dot)
 					currFiles = fu.GetFiles(cwd, dot)
@@ -144,6 +170,27 @@ func main() {
 					b2 = (height-co.YBuffBottom)+co.YBuffTop
 					currFile = 0
 					currY = co.YBuffTop
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+				} else if input.Rune() == co.KeyGoToFirst {
+					currFile = 0
+					currY = co.YBuffTop
+
+					b1 = 0
+					b2 = height - co.YBuffTop
+
+					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+				} else if input.Rune() == co.KeyGoToLast {
+					currFile = len(currFiles)-1
+
+					if len(currFiles) + (co.YBuffTop + co.YBuffBottom) > height {
+						currY = height - (co.YBuffBottom + 1)
+
+						b1 = len(currFiles) - len(currFiles[b1:b2])
+						b2 = len(currFiles)
+					} else {
+						currY = currFile + co.YBuffTop
+					}
+
 					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currFiles) != 0 {
 					if currFile == len(currFiles)-1 {
@@ -185,10 +232,6 @@ func main() {
 					}
 				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
 					if fu.Isd(currFiles[currFile]) {
-						/*oldB1, oldB2 = b1, b2
-						oldCurrFile = currFile
-						oldFileName = currFiles[currFile]
-						oldCurrY = */
 						os.Chdir(currFiles[currFile])
 						cwd, _ = os.Getwd()
 						currFiles = fu.GetFiles(cwd, dot)
