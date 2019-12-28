@@ -64,30 +64,31 @@ func Isd(path string) bool {
 func FormatText(s tcell.Screen, text string) string {
 	width, _ := s.Size()
 	cwd, _ := os.Getwd()
+
 	if Isd(text) {
 		if IsSel(cwd + "/" + text) {
-			if len(text) > width-(co.XBuff*2)-2 {
-				return "*"+text[:width-(co.XBuff*2)-5] + ".../"
+			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-2 {
+				return "*"+text[:width-(co.XBuff*2)-len(co.SelectArrow)-5] + ".../"
 			} else {
 				return "*"+text+"/"
 			}
 		} else {
-			if len(text) > width-(co.XBuff*2)-1 {
-				return text[:width-(co.XBuff*2)-4] + ".../"
+			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-1 {
+				return text[:width-(co.XBuff*2)-len(co.SelectArrow)-4] + ".../"
 			} else {
 				return text+"/"
 			}
 		}
 	} else {
 		if IsSel(cwd + "/" + text) {
-			if len(text) > width-(co.XBuff*2)-1 {
-				return "*"+text[:width-(co.XBuff*2)-4] + "..."
+			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-1 {
+				return "*"+text[:width-(co.XBuff*2)-len(co.SelectArrow)-4] + "..."
 			} else {
 				return "*"+text
 			}
 		} else {
-			if len(text) > width-(co.XBuff*2) {
-				return text[:width-(co.XBuff*2)-3] + "..."
+			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2) {
+				return text[:width-(co.XBuff*2)-len(co.SelectArrow)-3] + "..."
 			} else {
 				return text
 			}
@@ -218,8 +219,10 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 	} else {
 		DispFiles(s, currFs[buf1:buf2+1])
 	}
-	DispBar(s, co.BarStyle, currFs[currF])
-	SelFile(s, co.XBuff, y, currFs[currF])
+	if len(currFs) > 0 {
+		DispBar(s, co.BarStyle, currFs[currF])
+		SelFile(s, co.XBuff, y, currFs[currF])
+	}
 	s.Show()
 }
 
