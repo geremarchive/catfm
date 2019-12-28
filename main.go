@@ -185,7 +185,7 @@ func main() {
 					if len(currFiles) + co.YBuffTop + co.YBuffBottom > height {
 						currY = height - (co.YBuffBottom + 1)
 
-						b1 = (len(currFiles) - len(currFiles[b1:b2]))+(co.YBuffTop*2)
+						b1 = (len(currFiles) - len(currFiles[b1:b2])) + (co.YBuffTop*2)
 						b2 = len(currFiles)
 					} else {
 						currY = currFile + co.YBuffTop
@@ -256,7 +256,7 @@ func main() {
 							}
 						}
 						replacedString := strings.Replace(command[1], "@", currFiles[currFile], -1)
-						cmd := exec.Command("dash", "-c", replacedString)
+						cmd := exec.Command(co.Shell, "-c", replacedString)
 						if command[0] == "t" {
 							cmd.Stdout = os.Stdout
 							cmd.Stdin = os.Stdin
@@ -295,7 +295,7 @@ func main() {
 								currY = co.YBuffTop
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							} else if v[0] == "t" {
-								cmd := exec.Command("dash", "-c", replacedString)
+								cmd := exec.Command(co.Shell, "-c", replacedString)
 								cmd.Stdout = os.Stdout
 								cmd.Stdin = os.Stdin
 								s.Fini()
@@ -304,7 +304,7 @@ func main() {
 								s.Init()
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							} else if v[0] == "g" {
-								cmd := exec.Command("dash", "-c", replacedString)
+								cmd := exec.Command(co.Shell, "-c", replacedString)
 								cmd.Start()
 							}
 						}

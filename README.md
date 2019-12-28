@@ -1,6 +1,6 @@
 <h1 align="center">lunae 🌙</h1>
 
-<p align="center"><img height="125" width="125" src="media/lunae.png"></p>
+<p align="center"><img height="135" width="135" src="media/lunae.png"></p>
 <p align="center">lunae is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 <img align="right" src="media/scrot.png">
 
@@ -9,7 +9,7 @@
 * ```go```
 * ```tcell```
 * ```bytefmt```
-* ```dash```
+* ```copy```
 
 ## Building
 
@@ -21,17 +21,17 @@
 
 ```sudo pacman -S go```
 
-**Install dash from your distro's repositories: (Arch Linux for example)**
-
-```sudo pacman -S dash```
-
 **Install tcell:**
 
 ```go get github.com/gdamore/tcell```
 
-**Install bytefmt***
+**Install bytefmt**
 
 ```go get code.cloudfoundry.org/bytefmt```
+
+**Install copy**
+
+```go get github.com/otiai10/copy```
 
 **Build the program**
 
@@ -49,8 +49,7 @@ shell function (put this in your ```.shellrc```):
 
 ```bash
 lu() {
-	lunae
-	cd "$(< /tmp/lunar)"
+	lunae && cd "$(< /tmp/lunar)"
 }
 ```
 
@@ -62,3 +61,4 @@ lu() {
 - [ ] Add file searching
 - [ ] Add file renaming
 - [X] Add ability to customize the keys for delete, move, copy, movement, etc.
+- [X] Move to top or bottom screen
