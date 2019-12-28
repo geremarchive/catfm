@@ -182,10 +182,10 @@ func main() {
 				} else if input.Rune() == co.KeyGoToLast {
 					currFile = len(currFiles)-1
 
-					if len(currFiles) + (co.YBuffTop + co.YBuffBottom) > height {
+					if len(currFiles) + co.YBuffTop + co.YBuffBottom > height {
 						currY = height - (co.YBuffBottom + 1)
 
-						b1 = len(currFiles) - len(currFiles[b1:b2])
+						b1 = (len(currFiles) - len(currFiles[b1:b2]))+(co.YBuffTop*2)
 						b2 = len(currFiles)
 					} else {
 						currY = currFile + co.YBuffTop
