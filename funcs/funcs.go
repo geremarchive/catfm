@@ -1,7 +1,7 @@
 package funcs
 
 import (
-	co "lunae/config"
+	co "catfm/config"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
 	"sort"
@@ -61,34 +61,45 @@ func Isd(path string) bool {
 	}
 }
 
-func FormatText(s tcell.Screen, text string) string {
+func FormatText(s tcell.Screen, text string, sel bool) string {
 	width, _ := s.Size()
 	cwd, _ := os.Getwd()
 
+	var tlen int
+	var buflen int
+
+	if sel && (co.SelectType == "arrow" || co.SelectType == "arrow-default") {
+		tlen = len(text)+len(co.SelectArrow)
+		buflen = len(co.SelectArrow)
+	} else {
+		tlen = len(text)
+		buflen = 0
+	}
+
 	if Isd(text) {
 		if IsSel(cwd + "/" + text) {
-			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-2 {
-				return "*"+text[:width-(co.XBuff*2)-len(co.SelectArrow)-5] + ".../"
+			if tlen > width-(co.XBuff*2)-2 {
+				return "*"+text[:width-(co.XBuff*2)-buflen-5] + ".../"
 			} else {
 				return "*"+text+"/"
 			}
 		} else {
-			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-1 {
-				return text[:width-(co.XBuff*2)-len(co.SelectArrow)-4] + ".../"
+			if tlen > width-(co.XBuff*2)-1 {
+				return text[:width-(co.XBuff*2)-buflen-4] + ".../"
 			} else {
 				return text+"/"
 			}
 		}
 	} else {
 		if IsSel(cwd + "/" + text) {
-			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2)-1 {
-				return "*"+text[:width-(co.XBuff*2)-len(co.SelectArrow)-4] + "..."
+			if tlen > width-(co.XBuff*2)-1 {
+				return "*"+text[:width-(co.XBuff*2)-buflen-4] + "..."
 			} else {
 				return "*"+text
 			}
 		} else {
-			if len(text)+len(co.SelectArrow) > width-(co.XBuff*2) {
-				return text[:width-(co.XBuff*2)-len(co.SelectArrow)-3] + "..."
+			if tlen > width-(co.XBuff*2) {
+				return text[:width-(co.XBuff*2)-buflen-3] + "..."
 			} else {
 				return text
 			}
@@ -98,26 +109,28 @@ func FormatText(s tcell.Screen, text string) string {
 
 func DispFiles(s tcell.Screen, files []string) {
 	_, height := s.Size()
+
 	if len(files) != 0 {
 		for i, f := range files {
+			formated := FormatText(s, f, false)
 			if i+co.YBuffTop < (height - co.YBuffBottom) {
 				splitFile := strings.Split(f, ".")
 				if Isd(f) {
-					Addstr(s, co.FileColors["[dir]"], co.XBuff, i+co.YBuffTop, FormatText(s, f))
+					Addstr(s, co.FileColors["[dir]"], co.XBuff, i+co.YBuffTop, formated)
 				} else {
-					Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, i+co.YBuffTop, FormatText(s, f))
+					Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, i+co.YBuffTop, formated)
 				}
 			} else {
 				break
 			}
 		}
 	} else {
-		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, FormatText(s, "EMPTY"))
+		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, FormatText(s, "The cat can't seem to find anything here...", false))
 	}
 }
 
 func SelFile(s tcell.Screen, x int, y int, file string) {
-	formated := FormatText(s, file)
+	formated := FormatText(s, file, true)
 	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
 
@@ -132,7 +145,7 @@ func SelFile(s tcell.Screen, x int, y int, file string) {
 			if Isd(file) {
 				Addstr(s, co.FileColors["[dir]"], x+len(co.SelectArrow), y, formated)
 			} else {
-				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, FormatText(s, file))
+				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, formated)
 			}
 		}
 	} else if co.SelectType == "default" {
@@ -141,7 +154,7 @@ func SelFile(s tcell.Screen, x int, y int, file string) {
 }
 
 func DSelFile(s tcell.Screen, x int, y int, file string) {
-	formated := FormatText(s, file)
+	formated := FormatText(s, file, false)
 	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
 

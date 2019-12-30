@@ -1,6 +1,6 @@
 /*
 
-æ Welcome To The Lunae Source Code æ
+Welcome To The Catfm Source Code
 
 ------------------------------------
 
@@ -12,7 +12,7 @@ Info:
 
 More Info:
 
-∙ <http://github.com/geremachek/lunae/>
+∙ <http://github.com/geremachek/catfm/>
 ∙ <http://geremachek.io/>
 
 */
@@ -24,9 +24,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"fmt"
-	fu "lunae/funcs"
-	co "lunae/config"
+	//"fmt"
+	fu "catfm/funcs"
+	co "catfm/config"
 	cp "github.com/otiai10/copy"
 )
 
@@ -78,11 +78,9 @@ func main() {
 				if input.Rune() == co.KeyQuit {
 					s.Fini()
 
-					file, _ := os.Create("/tmp/lunar")
+					file, _ := os.Create("/tmp/kitty")
 					file.WriteString(cwd)
 					file.Close()
-
-					fmt.Println(b1, b2, currFile)
 
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
@@ -145,9 +143,9 @@ func main() {
 						co.Selected = append(co.Selected, cwd + "/" + currFiles[currFile])
 					}
 					if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + strings.Repeat(" ", len(co.SelectArrow)+1))
+						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile], false) + strings.Repeat(" ", len(co.SelectArrow)+1))
 					} else {
-						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile]) + " ")
+						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile], false) + " ")
 					}
 					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 					s.Show()

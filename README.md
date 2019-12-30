@@ -1,7 +1,6 @@
-<h1 align="center">lunae 🌙</h1>
+<h1 align="center">catfm 🐟</h1>
 
-<p align="center"><img height="135" width="135" src="media/lunae.png"></p>
-<p align="center">lunae is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
+<p align="center">catfm is a simple file manager that aims to improve on the now deprecated pluto file manager</p>
 <img align="right" src="media/scrot.png">
 
 ## Dependencies 
@@ -15,7 +14,7 @@
 
 **Clone the repository:**
 
-```git clone http://github.com/geremachek/lunae```
+```git clone http://github.com/geremachek/catfm```
 
 **Tnstall go from your distro's repositories: (Arch Linux for example)**
 
@@ -35,7 +34,7 @@
 
 **Build the program**
 
-Move into the ```lunae/``` directory and type ```go build```
+Move into the ```catfm/``` directory and type ```go build```
 
 **Move the binary to somewhere in your path**
 
@@ -49,7 +48,7 @@ shell function (put this in your ```.shellrc```):
 
 ```bash
 lu() {
-	lunae && cd "$(< /tmp/lunar)"
+	catfm && cd "$(< /tmp/kitty)"
 }
 ```
 
