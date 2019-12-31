@@ -180,7 +180,7 @@ func IsSel(path string) bool {
 	return in
 }
 
-func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
+func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr int, total int) {
 	var x int = co.XBuff
 	var elemOutput string
 	width, y := s.Size()
@@ -204,6 +204,15 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 		} else if k[1:] == "mode" {
 			f, _ := os.Stat(file)
 			elemOutput = f.Mode().String()
+		} else if k[1:] == "total" {
+			elemOutput = strconv.Itoa(curr) + "/" + strconv.Itoa(total)
+		} else if strings.Contains(k[1:], "$HOST") {
+			host, _ := os.Hostname()
+			elemOutput = strings.Replace(k[1:], "$HOST", host, -1)
+		} else if strings.Contains(k[1:], "$USER") {
+			elemOutput = strings.Replace(k[1:], "$USER", os.Getenv("USER"), -1)
+		} else if strings.Contains(k[1:], "$FILE") {
+			elemOutput = strings.Replace(k[1:], "$FILE", file, -1)
 		} else if k[1] == '[' && k[len(k)-1] == ']' {
 			replacedString := strings.Replace(k, "@", file, -1)
 			cmdOutput, _ := exec.Command("dash", "-c", replacedString[2:len(replacedString)-1]).Output()
@@ -211,6 +220,7 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string) {
 		} else {
 			elemOutput = k[1:]
 		}
+
 		Addstr(s, elements[k], x, y-(co.YBuffBottom)+1, elemOutput)
 		if num, _ := strconv.Atoi(string(k[0])); num != len(keys) {
 			Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), y-(co.YBuffBottom)+1, co.BarDiv)
@@ -233,7 +243,7 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 		DispFiles(s, currFs[buf1:buf2+1])
 	}
 	if len(currFs) > 0 {
-		DispBar(s, co.BarStyle, currFs[currF])
+		DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
 		SelFile(s, co.XBuff, y, currFs[currF])
 	}
 	s.Show()

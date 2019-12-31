@@ -13,7 +13,7 @@ Info:
 More Info:
 
 ∙ <http://github.com/geremachek/catfm/>
-∙ <http://geremachek.io/>
+∙ <http://geremachek.io/software>
 
 */
 
@@ -54,7 +54,7 @@ func main() {
 	b2 = (height-co.YBuffBottom)
 	fu.DispFiles(s, currFiles)
 	if len(currFiles) != 0 {
-		fu.DispBar(s, co.BarStyle, currFiles[currFile])
+		fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 		fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 	}
 	s.Show()
@@ -110,7 +110,7 @@ func main() {
 					}
 					if len(currFiles) != 0 {
 						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
+						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 					}
 					s.Show()
 				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
@@ -207,7 +207,7 @@ func main() {
 						currY += 1
 						currFile += 1
 						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
+						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 						s.Show()
 					}
 
@@ -224,7 +224,7 @@ func main() {
 						currY -= 1
 						currFile -= 1
 						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile])
+						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 						s.Show()
 
 					}
@@ -241,7 +241,7 @@ func main() {
 						fu.DispFiles(s, currFiles)
 						if len(currFiles) != 0 {
 							fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-							fu.DispBar(s, co.BarStyle, currFiles[currFile])
+							fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 						}
 						s.Show()
 					} else {
@@ -277,7 +277,14 @@ func main() {
 					currY = co.YBuffTop
 					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
+					currFile = 0
+
+					b1 = 0
+					b2 = height-co.YBuffBottom
+
 					currFiles = fu.GetFiles(cwd, dot)
+
+					currY = co.YBuffTop
 					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 				} else {
 					for k, v := range co.Bindings {
