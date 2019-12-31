@@ -1,7 +1,7 @@
 <h1 align="center">catfm 🐟</h1>
 
 <p align="center">catfm is a simple and programmable file manager that aims to improve on the now deprecated pluto file manager</p>
-<img align="right" src="media/scrot.png">
+<img align="right" src="media/catfm.png">
 
 ## Dependencies 
 
