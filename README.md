@@ -5,7 +5,7 @@
 
 ## About
 
-catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emulate the pluto file manager that I started working on in late 2018. Pluto was slow and buggy so I decided that I needed to rewrite from the ground up in a new language. Voilà, you have catfm!
+catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emulate the pluto file manager that I started working on in late 2018. Pluto was slow and buggy so I decided that I needed to rewrite it from scratch in a new language. So voilà, you have catfm!
 
 ## Dependencies 
 
