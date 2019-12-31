@@ -34,7 +34,7 @@ var (
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
 
-	BarBg tcell.Color = tcell.ColorBlue
+	BarBg tcell.Color = tcell.ColorWhite
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
 	BarStyle = map[string]tcell.Style{
@@ -54,6 +54,11 @@ var (
 	SelectStyle tcell.Style = tcell.StyleDefault.Reverse(true)
 	SelectArrow string = "> "
 	SelectArrowStyle tcell.Style = tcell.StyleDefault.Bold(true)
+
+	PipeType = "" // thick, thin, hollow, round (empty string to disable)
+	PipeStyle tcell.Style = tcell.StyleDefault
+	PipeText = "" // user@host, catfm@host, user@catfm, or any text
+	PipeTextStyle = tcell.StyleDefault
 
 	Shell string = "sh" // Shell that will be used to execute commands
 

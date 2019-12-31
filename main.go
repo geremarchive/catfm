@@ -24,7 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	//"fmt"
+	"fmt"
 	fu "catfm/funcs"
 	co "catfm/config"
 	cp "github.com/otiai10/copy"
@@ -49,10 +49,17 @@ func main() {
 
 	s, _ := tcell.NewScreen()
 	s.Init()
+
+	s.Fini()
+
+	s, _ = tcell.NewScreen()
+	s.Init()
+
 	width, height = s.Size()
 
 	b2 = (height-co.YBuffBottom)
 	fu.DispFiles(s, currFiles)
+	fu.BorderPipes(s)
 	if len(currFiles) != 0 {
 		fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
 		fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
@@ -64,6 +71,7 @@ func main() {
 		if width != nw && height == nh {
 			width, height = nw, nh
 			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+			fu.BorderPipes(s)
 		} else if height != nh && width != nh {
 			width, height = nw, nh
 			b1 = 0
@@ -71,6 +79,7 @@ func main() {
 			currY = co.YBuffTop
 			currFile = 0
 			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+			fu.BorderPipes(s)
 		}
 		input := s.PollEvent()
 		switch input := input.(type) {
@@ -239,6 +248,7 @@ func main() {
 						currY = co.YBuffTop
 						s.Clear()
 						fu.DispFiles(s, currFiles)
+						fu.BorderPipes(s)
 						if len(currFiles) != 0 {
 							fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
 							fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
@@ -263,6 +273,7 @@ func main() {
 							s, _ = tcell.NewScreen()
 							s.Init()
 							fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+							fu.BorderPipes(s)
 						} else if command[0] == "g" {
 							cmd.Start()
 						}
@@ -301,13 +312,15 @@ func main() {
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
 							} else if v[0] == "t" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)
+								s.Fini()
 								cmd.Stdout = os.Stdout
 								cmd.Stdin = os.Stdin
-								s.Fini()
 								cmd.Run()
+								fmt.Print()
 								s, _ = tcell.NewScreen()
 								s.Init()
 								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+								fu.BorderPipes(s)
 							} else if v[0] == "g" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)
 								cmd.Start()

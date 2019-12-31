@@ -49,6 +49,16 @@ func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	}
 }
 
+/*func Clear(s tcell.Screen) {
+	width, height := s.Size()
+
+	for i := co.YBuffTop; i <= height-co.YBuffBottom; i++ {
+		Addstr(s, tcell.StyleDefault, co.XBuff, i, strings.Repeat(" ", width-(co.XBuff*2)))
+	}
+
+	s.Show()
+}*/
+
 func Isd(path string) bool {
 	f, err := os.Stat(path)
 	if err != nil {
@@ -246,6 +256,7 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 		DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
 		SelFile(s, co.XBuff, y, currFs[currF])
 	}
+	BorderPipes(s)
 	s.Show()
 }
 
@@ -258,4 +269,64 @@ func Itemi(item string, slice []string) (out int) {
 	}
 
 	return
+}
+
+func BorderPipes(s tcell.Screen) {
+	if co.PipeType != "" {
+		thin := []rune{'┌', '┐', '└', '┘', '─', '│'}
+		thick := []rune{'┏', '┓', '┗', '┛', '━', '┃'}
+		hollow := []rune{'╔', '╗', '╚', '╝', '═', '║'}
+		round := []rune{'╭', '╮', '╰', '╯', '─', '│'}
+		used := []rune{}
+
+		width, height := s.Size()
+
+		if co.PipeType == "thick" {
+			used = thick
+		} else if co.PipeType == "thin" {
+			used = thin
+		} else if co.PipeType == "hollow" {
+			used = hollow
+		} else if co.PipeType == "round" {
+			used = round
+		}
+
+		s.SetContent(0, 0, used[0], []rune(""), co.PipeStyle)
+		s.SetContent(width-1, 0, used[1], []rune(""), co.PipeStyle)
+
+		s.SetContent(0, height-1, used[2], []rune(""), co.PipeStyle)
+		s.SetContent(width-1, height-1, used[3], []rune(""), co.PipeStyle)
+
+		for i := 1; i < width-1; i++ {
+			s.SetContent(i, 0, used[4], []rune(""), co.PipeStyle)
+			s.SetContent(i, height-1, used[4], []rune(""), co.PipeStyle)
+		}
+
+		for i := 1; i < height-1; i++ {
+			s.SetContent(0, i, used[5], []rune(""), co.PipeStyle)
+			s.SetContent(width-1, i, used[5], []rune(""), co.PipeStyle)
+		}
+
+		s.Show()
+	}
+
+	if co.PipeText != "" {
+		user := os.Getenv("USER")
+		host, _ := os.Hostname()
+
+		var text string
+
+		if co.PipeText == "user@host" {
+			text = user + "@" + host
+		} else if co.PipeText == "catfm@host" {
+			text = "catfm@" + host
+		} else if co.PipeText == "user@catfm" {
+			text = user + "@catfm"
+		} else {
+			text = co.PipeText
+		}
+
+		Addstr(s, co.PipeTextStyle, 1, 0, text)
+		s.Show()
+	}
 }
