@@ -169,6 +169,12 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 	width, _ := s.Size()
 
 	if co.SelectType == "full" {
+		if Isd(file) {
+			Addstr(s, co.FileColors["[dir]"], x, y, formated)
+		} else {
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
+		}
+
 		Addstr(s, tcell.StyleDefault, x+len(formated), y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
 	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
 		if Isd(file) {
