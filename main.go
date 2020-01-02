@@ -7,7 +7,7 @@ Welcome To The Catfm Source Code
 Info:
 
 ∙ This project was created and is maintained by geremachek (gmk).
-∙ Lunae is registered under the GPL v. 3 witch means you are free to modify and distribute it and its source code
+∙ Catfm is registered under the GPL v. 3 witch means you are free to modify and distribute it and its source code
 ∙ This project was based on the now deprecated pluto file-manager and shares a lot of the core design ideas of that file-manager
 
 More Info:
@@ -44,6 +44,10 @@ var (
 )
 
 func main() {
+	if len(os.Args) > 1 {
+		os.Chdir(os.Args[1])
+	}
+
 	cwd, _ := os.Getwd()
 	currFiles := fu.GetFiles(cwd, dot)
 
