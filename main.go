@@ -190,14 +190,14 @@ func main() {
 					b2 = height - co.YBuffTop
 
 					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
-				} else if input.Rune() == co.KeyGoToLast {
+				} else if input.Rune() == co.KeyGoToLast && currFile < len(currFiles)-1 {
 					currFile = len(currFiles)-1
 
 					if len(currFiles) + co.YBuffTop + co.YBuffBottom > height {
 						currY = height - (co.YBuffBottom + 1)
 
-						b1 = (len(currFiles) - len(currFiles[b1:b2])) + (co.YBuffTop*2)
-						b2 = len(currFiles)
+						b1 = (len(currFiles))-(height-(co.YBuffTop+co.YBuffBottom))
+						b2 = len(currFiles)-1
 					} else {
 						currY = currFile + co.YBuffTop
 					}

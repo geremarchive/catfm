@@ -49,16 +49,6 @@ func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	}
 }
 
-/*func Clear(s tcell.Screen) {
-	width, height := s.Size()
-
-	for i := co.YBuffTop; i <= height-co.YBuffBottom; i++ {
-		Addstr(s, tcell.StyleDefault, co.XBuff, i, strings.Repeat(" ", width-(co.XBuff*2)))
-	}
-
-	s.Show()
-}*/
-
 func Isd(path string) bool {
 	f, err := os.Stat(path)
 	if err != nil {
