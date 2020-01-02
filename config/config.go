@@ -44,7 +44,7 @@ var (
 
 		"1cwd": tcell.StyleDefault.Background(BarBg).Bold(true),
 		"2size": tcell.StyleDefault.Background(BarBg),
-		"3mode": tcell.StyleDefault.Background(BarBg),
+		"3$USER@$HOST": tcell.StyleDefault.Background(BarBg),
 
 		// Other elements: total
 		// Variables: $HOST, $USER, $FILE

@@ -212,19 +212,25 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			elemOutput = f.Mode().String()
 		} else if k[1:] == "total" {
 			elemOutput = strconv.Itoa(curr) + "/" + strconv.Itoa(total)
-		} else if strings.Contains(k[1:], "$HOST") {
-			host, _ := os.Hostname()
-			elemOutput = strings.Replace(k[1:], "$HOST", host, -1)
-		} else if strings.Contains(k[1:], "$USER") {
-			elemOutput = strings.Replace(k[1:], "$USER", os.Getenv("USER"), -1)
-		} else if strings.Contains(k[1:], "$FILE") {
-			elemOutput = strings.Replace(k[1:], "$FILE", file, -1)
 		} else if k[1] == '[' && k[len(k)-1] == ']' {
 			replacedString := strings.Replace(k, "@", file, -1)
 			cmdOutput, _ := exec.Command("dash", "-c", replacedString[2:len(replacedString)-1]).Output()
 			elemOutput = string(cmdOutput)
 		} else {
 			elemOutput = k[1:]
+		}
+
+		if strings.Contains(k[1:], "$HOST") {
+			host, _ := os.Hostname()
+			elemOutput = strings.Replace(elemOutput, "$HOST", host, -1)
+		}
+
+		if strings.Contains(k[1:], "$USER") {
+			elemOutput = strings.Replace(elemOutput, "$USER", os.Getenv("USER"), -1)
+		}
+
+		if strings.Contains(k[1:], "$FILE") {
+			elemOutput = strings.Replace(elemOutput, "$FILE", file, -1)
 		}
 
 		Addstr(s, elements[k], x, y-(co.YBuffBottom)+1, elemOutput)
