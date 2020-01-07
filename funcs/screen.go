@@ -188,19 +188,28 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 
 func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf2 int) error {
 	s.Clear()
-	if buf1 == 0 {
-		err := DispFiles(s, currFs)
 
-		if err != nil {
-			return err
-		}
-	} else {
-		err := DispFiles(s, currFs[buf1:buf2+1])
+	c := make(chan error)
+	var err error
 
-		if err != nil {
-			return err
+	go func(c chan error) {
+		if buf1 == 0 {
+			err = DispFiles(s, currFs)
+		} else {
+			err = DispFiles(s, currFs[buf1:buf2+1])
 		}
+
+		c <- err
+	}(c)
+
+	err = <-c
+
+	if err != nil {
+		return err
 	}
+
+	go BorderPipes(s)
+
 	if len(currFs) > 0 {
 		err := DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
 
@@ -215,7 +224,6 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 		}
 	}
 
-	BorderPipes(s)
 	s.Show()
 
 	return nil

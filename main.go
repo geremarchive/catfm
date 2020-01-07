@@ -87,19 +87,8 @@ func main() {
 	width, height = s.Size()
 	b2 = (height-co.YBuffBottom)
 
-	if err := fu.DispFiles(s, currFiles); err != nil {
+	if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
 		panic(err)
-	}
-
-	fu.BorderPipes(s)
-
-	if len(currFiles) != 0 {
-		if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
-			panic(err)
-		}
-		if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
-			panic(err)
-		}
 	}
 
 	s.Show()
@@ -298,6 +287,17 @@ func main() {
 							panic(err)
 						}
 					} else {
+						c := make(chan error)
+						go func(c chan error) {
+							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile, len(currFiles))
+						}(c)
+
+						err := <-c
+
+						if err != nil {
+							panic(err)
+						}
+
 						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
 							panic(err)
 						}
@@ -309,9 +309,6 @@ func main() {
 							panic(err)
 						}
 
-						if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
-							panic(err)
-						}
 						s.Show()
 					}
 
@@ -327,6 +324,17 @@ func main() {
 							panic(err)
 						}
 					} else {
+						c := make(chan error)
+						go func(c chan error) {
+							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile, len(currFiles))
+						}(c)
+
+						err := <-c
+
+						if err != nil {
+							panic(err)
+						}
+
 						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
 							panic(err)
 						}
@@ -338,12 +346,7 @@ func main() {
 							panic(err)
 						}
 
-						if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
-							panic(err)
-						}
-
 						s.Show()
-
 					}
 				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
 					if fu.Isd(currFiles[currFile]) {
@@ -517,8 +520,6 @@ func main() {
 								if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
 									panic(err)
 								}
-
-								fu.BorderPipes(s)
 							} else if v[0] == "g" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)
 								cmd.Start()
