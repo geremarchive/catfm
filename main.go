@@ -463,6 +463,8 @@ func main() {
 						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
 							panic(err)
 						}
+
+						fu.BorderPipes(s)
 					}
 				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
 					currFile = 0
