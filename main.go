@@ -165,33 +165,16 @@ func main() {
 						if currFile == len(currFiles) && b1 == 0 {
 							currY -= 1
 							currFile -= 1
-							if err := fu.DispFiles(s, currFiles); err != nil {
-								panic(err)
-							}
-						} else if b1 == 0 {
-							if err := fu.DispFiles(s, currFiles); err != nil {
-								panic(err)
-							}
 						} else if currFile == len(currFiles) {
 							b1 -= 1
 							b2 -= 1
 							currFile -= 1
-							if err := fu.DispFiles(s, currFiles[b1:b2]); err != nil {
-								panic(err)
-							}
-						} else {
-							if err := fu.DispFiles(s, currFiles[b1:b2]); err != nil {
-								panic(err)
-							}
 						}
-						if len(currFiles) != 0 {
-							if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
 								panic(err)
-							}
-							if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
-								panic(err)
-							}
 						}
+
 						s.Show()
 					}
 				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
@@ -464,7 +447,6 @@ func main() {
 							panic(err)
 						}
 
-						fu.BorderPipes(s)
 					}
 				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
 					currFile = 0

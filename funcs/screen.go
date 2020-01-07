@@ -214,6 +214,8 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 			return err
 		}
 	}
+
+	BorderPipes(s)
 	s.Show()
 
 	return nil
