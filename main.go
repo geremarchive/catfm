@@ -45,36 +45,73 @@ var (
 
 func main() {
 	if len(os.Args) > 1 {
-		os.Chdir(os.Args[1])
+		err := os.Chdir(os.Args[1])
+
+		if err != nil {
+			fmt.Println("Couldn't open '" + os.Args[1] + "'")
+		}
 	}
 
-	cwd, _ := os.Getwd()
-	currFiles := fu.GetFiles(cwd, dot)
+	cwd, err := os.Getwd()
 
-	s, _ := tcell.NewScreen()
+	if err != nil {
+		panic(err)
+	}
+
+	currFiles, err := fu.GetFiles(cwd, dot)
+
+	if err != nil {
+		panic(err)
+	}
+
+	s, err := tcell.NewScreen()
+
+	if err != nil {
+		panic(err)
+	}
+
 	s.Init()
 
 	s.Fini()
 
-	s, _ = tcell.NewScreen()
+	s, err = tcell.NewScreen()
+
+	if err != nil {
+		panic(err)
+	}
+
 	s.Init()
 
-	width, height = s.Size()
+	defer s.Fini()
 
+	width, height = s.Size()
 	b2 = (height-co.YBuffBottom)
-	fu.DispFiles(s, currFiles)
-	fu.BorderPipes(s)
-	if len(currFiles) != 0 {
-		fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
-		fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
+
+	if err := fu.DispFiles(s, currFiles); err != nil {
+		panic(err)
 	}
+
+	fu.BorderPipes(s)
+
+	if len(currFiles) != 0 {
+		if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+			panic(err)
+		}
+		if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+			panic(err)
+		}
+	}
+
 	s.Show()
 
 	for {
 		nw, nh := s.Size()
 		if width != nw && height == nh {
 			width, height = nw, nh
-			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+
+			if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+				panic(err)
+			}
 			fu.BorderPipes(s)
 		} else if height != nh && width != nh {
 			width, height = nw, nh
@@ -82,72 +119,111 @@ func main() {
 			b2 = (height-co.YBuffBottom)+co.YBuffTop
 			currY = co.YBuffTop
 			currFile = 0
-			fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+
+			if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+				panic(err)
+			}
+
 			fu.BorderPipes(s)
 		}
 		input := s.PollEvent()
+
 		switch input := input.(type) {
 			case *tcell.EventKey:
 				if input.Rune() == co.KeyQuit {
 					s.Fini()
 
-					file, _ := os.Create("/tmp/kitty")
-					file.WriteString(cwd)
-					file.Close()
+					file, err := os.Create("/tmp/kitty")
+
+					defer file.Close()
+
+					if err != nil {
+						fmt.Println("Couldn't create /tmp/kitty")
+						os.Exit(0)
+					} else {
+
+						_, err := file.WriteString(cwd)
+
+						if err != nil {
+							fmt.Println("Couldn't write to /tmp/kitty")
+						}
+					}
 
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
-					os.RemoveAll(currFiles[currFile])
+					err := os.RemoveAll(currFiles[currFile])
 
-					if index, in := fu.In(currFiles[currFile], co.Selected); in {
-						co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
+					if err == nil {
+						if index, in := fu.In(currFiles[currFile], co.Selected); in {
+							co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
+						}
+
+						currFiles = append(currFiles[:currFile], currFiles[currFile+1:]...)
+
+						s.Clear()
+
+						if currFile == len(currFiles) && b1 == 0 {
+							currY -= 1
+							currFile -= 1
+							if err := fu.DispFiles(s, currFiles); err != nil {
+								panic(err)
+							}
+						} else if b1 == 0 {
+							if err := fu.DispFiles(s, currFiles); err != nil {
+								panic(err)
+							}
+						} else if currFile == len(currFiles) {
+							b1 -= 1
+							b2 -= 1
+							currFile -= 1
+							if err := fu.DispFiles(s, currFiles[b1:b2]); err != nil {
+								panic(err)
+							}
+						} else {
+							if err := fu.DispFiles(s, currFiles[b1:b2]); err != nil {
+								panic(err)
+							}
+						}
+						if len(currFiles) != 0 {
+							if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+								panic(err)
+							}
+							if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+								panic(err)
+							}
+						}
+						s.Show()
 					}
-
-					currFiles = append(currFiles[:currFile], currFiles[currFile+1:]...)
-
-					s.Clear()
-
-					if currFile == len(currFiles) && b1 == 0 {
-						currY -= 1
-						currFile -= 1
-						fu.DispFiles(s, currFiles)
-					} else if b1 == 0 {
-						fu.DispFiles(s, currFiles)
-					} else if currFile == len(currFiles) {
-						b1 -= 1
-						b2 -= 1
-						currFile -= 1
-						fu.DispFiles(s, currFiles[b1:b2])
-					} else {
-						fu.DispFiles(s, currFiles[b1:b2])
-					}
-					if len(currFiles) != 0 {
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
-					}
-					s.Show()
 				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
 					for _, elem := range co.Selected {
 						split := strings.Split(elem, "/")
 						if input.Rune() == co.KeyCopy {
-							cp.Copy(elem, cwd + "/" + split[len(split)-1])
+							err = cp.Copy(elem, cwd + "/" + split[len(split)-1])
 						} else if input.Rune() == co.KeyMove {
-							cp.Copy(elem, cwd + "/" + split[len(split)-1])
-							os.RemoveAll(elem)
+							err = cp.Copy(elem, cwd + "/" + split[len(split)-1])
+							err = os.RemoveAll(elem)
 						} else if input.Rune() == co.KeyBulkDelete {
-							os.RemoveAll(elem)
+							err = os.RemoveAll(elem)
 						}
 					}
 
-					co.Selected = []string{}
-					currFiles = fu.GetFiles(cwd, dot)
+					if err == nil {
+						co.Selected = []string{}
+						currFiles, err = fu.GetFiles(cwd, dot)
 
-					currY = co.YBuffTop
-					currFile = 0
+						if err != nil {
+							panic(err)
+						}
 
-					b1, b2 = 0, height - co.YBuffBottom
+						currY = co.YBuffTop
+						currFile = 0
 
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+						b1, b2 = 0, height - co.YBuffBottom
+
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							panic(err)
+						}
+					}
 				} else if input.Rune() == co.KeySelect {
 					if fu.IsSel(cwd + "/" + currFiles[currFile]) {
 						index, _ := fu.In(cwd + "/" + currFiles[currFile], co.Selected)
@@ -155,13 +231,21 @@ func main() {
 					} else {
 						co.Selected = append(co.Selected, cwd + "/" + currFiles[currFile])
 					}
-					if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile], false) + strings.Repeat(" ", len(co.SelectArrow)+1))
-					} else {
-						fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, fu.FormatText(s, currFiles[currFile], false) + " ")
+
+					formated, err := fu.FormatText(s, currFiles[currFile], false)
+
+					if err == nil {
+						if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
+							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
+						} else {
+							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, formated + " ")
+						}
+
+						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+							panic(err)
+						}
+						s.Show()
 					}
-					fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-					s.Show()
 				} else if input.Rune() == co.KeySelectAll {
 					for _, elem := range currFiles {
 						if _, in := fu.In(cwd + "/" + elem, co.Selected); !in {
@@ -169,19 +253,28 @@ func main() {
 						}
 					}
 
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						panic(err)
+					}
 				} else if input.Rune() == co.KeyDeselectAll {
 					co.Selected = []string{}
 
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						panic(err)
+					}
 				} else if input.Rune() == co.KeyDotToggle {
 					dot = !(dot)
-					currFiles = fu.GetFiles(cwd, dot)
-					b1 = 0
-					b2 = (height-co.YBuffBottom)+co.YBuffTop
-					currFile = 0
-					currY = co.YBuffTop
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					currFiles, err = fu.GetFiles(cwd, dot)
+
+					if err == nil {
+						b1 = 0
+						b2 = (height-co.YBuffBottom)+co.YBuffTop
+						currFile = 0
+						currY = co.YBuffTop
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							panic(err)
+						}
+					}
 				} else if input.Rune() == co.KeyGoToFirst {
 					currFile = 0
 					currY = co.YBuffTop
@@ -189,7 +282,9 @@ func main() {
 					b1 = 0
 					b2 = height - co.YBuffTop
 
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						panic(err)
+					}
 				} else if input.Rune() == co.KeyGoToLast && currFile < len(currFiles)-1 {
 					currFile = len(currFiles)-1
 
@@ -202,7 +297,9 @@ func main() {
 						currY = currFile + co.YBuffTop
 					}
 
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						panic(err)
+					}
 				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currFiles) != 0 {
 					if currFile == len(currFiles)-1 {
 						continue
@@ -214,13 +311,24 @@ func main() {
 							b2 += 1
 						}
 						currFile += 1
-						fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							panic(err)
+						}
 					} else {
-						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
+						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+							panic(err)
+						}
+
 						currY += 1
 						currFile += 1
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
+
+						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+							panic(err)
+						}
+
+						if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+							panic(err)
+						}
 						s.Show()
 					}
 
@@ -231,31 +339,69 @@ func main() {
 						b1 -= 1
 						b2 -= 1
 						currFile -= 1
-						fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							panic(err)
+						}
 					} else {
-						fu.DSelFile(s, co.XBuff, currY, currFiles[currFile])
+						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+							panic(err)
+						}
+
 						currY -= 1
 						currFile -= 1
-						fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-						fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
+
+						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+							panic(err)
+						}
+
+						if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+							panic(err)
+						}
+
 						s.Show()
 
 					}
 				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
 					if fu.Isd(currFiles[currFile]) {
-						os.Chdir(currFiles[currFile])
-						cwd, _ = os.Getwd()
-						currFiles = fu.GetFiles(cwd, dot)
-						b1 = 0
-						b2 = (height-co.YBuffBottom)+co.YBuffTop
-						currFile = 0
-						currY = co.YBuffTop
-						s.Clear()
-						fu.DispFiles(s, currFiles)
-						fu.BorderPipes(s)
+						err := os.Chdir(currFiles[currFile])
+
+						if err == nil {
+
+							cwd, err = os.Getwd()
+
+							if err != nil {
+								panic(err)
+							}
+
+							currFiles, err = fu.GetFiles(cwd, dot)
+
+							if err != nil {
+								panic(err)
+							}
+
+							b1 = 0
+							b2 = (height-co.YBuffBottom)+co.YBuffTop
+							currFile = 0
+							currY = co.YBuffTop
+
+							s.Clear()
+
+							if err := fu.DispFiles(s, currFiles); err != nil {
+								panic(err)
+							}
+
+							fu.BorderPipes(s)
+						}
+
 						if len(currFiles) != 0 {
-							fu.SelFile(s, co.XBuff, currY, currFiles[currFile])
-							fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles))
+							if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+								panic(err)
+							}
+
+							if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+								panic(err)
+							}
 						}
 						s.Show()
 					} else {
@@ -267,63 +413,127 @@ func main() {
 								break
 							}
 						}
+
 						replacedString := strings.Replace(command[1], "@", currFiles[currFile], -1)
 						cmd := exec.Command(co.Shell, "-c", replacedString)
+
 						if command[0] == "t" {
 							cmd.Stdout = os.Stdout
 							cmd.Stdin = os.Stdin
+
 							s.Fini()
 							cmd.Run()
-							s, _ = tcell.NewScreen()
+							s, err = tcell.NewScreen()
+
+							if err != nil {
+								panic(err)
+							}
+
 							s.Init()
-							fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+							if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+								panic(err)
+							}
+
 							fu.BorderPipes(s)
 						} else if command[0] == "g" {
 							cmd.Start()
 						}
 					}
 				} else if input.Key() == tcell.KeyLeft || input.Rune() == co.KeyLeft {
-					os.Chdir("..")
-					cwd, _ = os.Getwd()
-					currFiles = fu.GetFiles(cwd, dot)
-					b1 = 0
-					b2 = (height-co.YBuffBottom)+co.YBuffTop
-					currFile = 0
-					currY = co.YBuffTop
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+					err := os.Chdir("..")
+
+					if err == nil {
+						cwd, err = os.Getwd()
+
+						if err != nil {
+							panic(err)
+						}
+
+						currFiles, err = fu.GetFiles(cwd, dot)
+
+						if err != nil {
+							panic(err)
+						}
+
+						b1 = 0
+						b2 = (height-co.YBuffBottom)+co.YBuffTop
+						currFile = 0
+						currY = co.YBuffTop
+
+						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							panic(err)
+						}
+					}
 				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
 					currFile = 0
 
 					b1 = 0
 					b2 = height-co.YBuffBottom
 
-					currFiles = fu.GetFiles(cwd, dot)
+					currFiles, err = fu.GetFiles(cwd, dot)
+
+					if err != nil {
+						panic(err)
+					}
 
 					currY = co.YBuffTop
-					fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+
+					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						panic(err)
+					}
 				} else {
 					for k, v := range co.Bindings {
 						if k == input.Rune() {
 							replacedString := strings.Replace(v[1], "@", currFiles[currFile], -1)
+
 							if v[0] == "cd" {
-								os.Chdir(strings.Replace(string(v[1]), "~", os.Getenv("HOME"), -1))
-								cwd, _ = os.Getwd()
-								currFiles = fu.GetFiles(cwd, dot)
-								b1 = 0
-								b2 = (height-co.YBuffBottom)+co.YBuffTop
-								currFile = 0
-								currY = co.YBuffTop
-								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+								err := os.Chdir(strings.Replace(string(v[1]), "~", os.Getenv("HOME"), -1))
+
+								if err == nil {
+									cwd, err = os.Getwd()
+
+									if err != nil {
+										panic(err)
+									}
+
+									currFiles, err = fu.GetFiles(cwd, dot)
+
+									if err != nil {
+										panic(err)
+									}
+
+									b1 = 0
+									b2 = (height-co.YBuffBottom)+co.YBuffTop
+									currFile = 0
+									currY = co.YBuffTop
+
+									if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+										panic(err)
+									}
+								}
 							} else if v[0] == "t" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)
+
 								s.Fini()
+
 								cmd.Stdout = os.Stdout
 								cmd.Stdin = os.Stdin
 								cmd.Run()
+
 								fmt.Print()
-								s, _ = tcell.NewScreen()
+
+								s, err = tcell.NewScreen()
+
+								if err != nil {
+									panic(err)
+								}
+
 								s.Init()
-								fu.DrawScreen(s, currFiles, currFile, currY, b1, b2)
+
+								if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+									panic(err)
+								}
+
 								fu.BorderPipes(s)
 							} else if v[0] == "g" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)

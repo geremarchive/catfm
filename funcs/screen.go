@@ -1,47 +1,15 @@
 package funcs
 
 import (
-	co "catfm/config"
 	"github.com/gdamore/tcell"
-	"io/ioutil"
+	"strings"
 	"sort"
 	"os"
-	"os/exec"
 	"strconv"
-	"strings"
+	"os/exec"
 	"code.cloudfoundry.org/bytefmt"
+	co "catfm/config"
 )
-
-var (
-	barLen int
-)
-
-func In(item string, array []string) (int, bool) {
-	for i, elem := range array {
-		if elem == item {
-			return i, true
-		}
-	}
-	return 0, false
-}
-
-func GetFiles(path string, dot bool) ([]string) {
-	var d []string
-	var f []string
-	files, _ := ioutil.ReadDir(path)
-	for _, elem := range files {
-		if elem.Name()[0] == '.' && !(dot) {
-			continue
-		} else if elem.IsDir() {
-			d = append(d, string(elem.Name()))
-		} else {
-			f = append(f, string(elem.Name()))
-		}
-	}
-	sort.Strings(d)
-	sort.Strings(f)
-	return append(d, f...)
-}
 
 func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	for i := x; i < len(text)+x; i++ {
@@ -49,70 +17,17 @@ func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	}
 }
 
-func Isd(path string) bool {
-	f, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	if f.IsDir() {
-		return true
-	} else {
-		return false
-	}
-}
-
-func FormatText(s tcell.Screen, text string, sel bool) string {
-	width, _ := s.Size()
-	cwd, _ := os.Getwd()
-
-	var tlen int
-	var buflen int
-
-	if sel && (co.SelectType == "arrow" || co.SelectType == "arrow-default") {
-		tlen = len(text)+len(co.SelectArrow)
-		buflen = len(co.SelectArrow)
-	} else {
-		tlen = len(text)
-		buflen = 0
-	}
-
-	if Isd(text) {
-		if IsSel(cwd + "/" + text) {
-			if tlen > width-(co.XBuff*2)-2 {
-				return "*"+text[:width-(co.XBuff*2)-buflen-5] + ".../"
-			} else {
-				return "*"+text+"/"
-			}
-		} else {
-			if tlen > width-(co.XBuff*2)-1 {
-				return text[:width-(co.XBuff*2)-buflen-4] + ".../"
-			} else {
-				return text+"/"
-			}
-		}
-	} else {
-		if IsSel(cwd + "/" + text) {
-			if tlen > width-(co.XBuff*2)-1 {
-				return "*"+text[:width-(co.XBuff*2)-buflen-4] + "..."
-			} else {
-				return "*"+text
-			}
-		} else {
-			if tlen > width-(co.XBuff*2) {
-				return text[:width-(co.XBuff*2)-buflen-3] + "..."
-			} else {
-				return text
-			}
-		}
-	}
-}
-
-func DispFiles(s tcell.Screen, files []string) {
+func DispFiles(s tcell.Screen, files []string) error {
 	_, height := s.Size()
 
 	if len(files) != 0 {
 		for i, f := range files {
-			formated := FormatText(s, f, false)
+			formated, err := FormatText(s, f, false)
+
+			if err != nil {
+				return err
+			}
+
 			if i+co.YBuffTop < (height - co.YBuffBottom) {
 				splitFile := strings.Split(f, ".")
 				if Isd(f) {
@@ -125,12 +40,25 @@ func DispFiles(s tcell.Screen, files []string) {
 			}
 		}
 	} else {
-		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, FormatText(s, "The cat can't seem to find anything here...", false))
+		msg, err := FormatText(s, "The cat can't seem to find anything here...", false)
+
+		if err != nil {
+			return err
+		}
+
+		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, msg)
 	}
+
+	return nil
 }
 
-func SelFile(s tcell.Screen, x int, y int, file string) {
-	formated := FormatText(s, file, true)
+func SelFile(s tcell.Screen, x int, y int, file string) error {
+	formated, err := FormatText(s, file, true)
+
+	if err != nil {
+		return err
+	}
+
 	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
 
@@ -151,10 +79,17 @@ func SelFile(s tcell.Screen, x int, y int, file string) {
 	} else if co.SelectType == "default" {
 		Addstr(s, co.SelectStyle, x, y, formated)
 	}
+
+	return nil
 }
 
-func DSelFile(s tcell.Screen, x int, y int, file string) {
-	formated := FormatText(s, file, false)
+func DSelFile(s tcell.Screen, x int, y int, file string) error {
+	formated, err := FormatText(s, file, false)
+
+	if err != nil {
+		return err
+	}
+
 	splitFile := strings.Split(file, ".")
 	width, _ := s.Size()
 
@@ -179,14 +114,11 @@ func DSelFile(s tcell.Screen, x int, y int, file string) {
 			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
 		}
 	}
+
+	return nil
 }
 
-func IsSel(path string) bool {
-	_, in := In(path, co.Selected)
-	return in
-}
-
-func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr int, total int) {
+func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr int, total int) error {
 	var x int = co.XBuff
 	var elemOutput string
 	width, y := s.Size()
@@ -221,7 +153,12 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 		}
 
 		if strings.Contains(k[1:], "$HOST") {
-			host, _ := os.Hostname()
+			host, err := os.Hostname()
+
+			if err != nil {
+				return err
+			}
+
 			elemOutput = strings.Replace(elemOutput, "$HOST", host, -1)
 		}
 
@@ -245,32 +182,41 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 		Addstr(s, tcell.StyleDefault.Background(co.BarBg), width-3, y-(co.YBuffBottom)+1, "...")
 	}
 	barLen = x
+
+	return nil
 }
 
-func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf2 int) {
+func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf2 int) error {
 	s.Clear()
 	if buf1 == 0 {
-		DispFiles(s, currFs)
-	} else {
-		DispFiles(s, currFs[buf1:buf2+1])
-	}
-	if len(currFs) > 0 {
-		DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
-		SelFile(s, co.XBuff, y, currFs[currF])
-	}
-	BorderPipes(s)
-	s.Show()
-}
+		err := DispFiles(s, currFs)
 
-func Itemi(item string, slice []string) (out int) {
-	for index, elem := range slice {
-		if elem == item {
-			out = index
-			break
+		if err != nil {
+			return err
+		}
+	} else {
+		err := DispFiles(s, currFs[buf1:buf2+1])
+
+		if err != nil {
+			return err
 		}
 	}
+	if len(currFs) > 0 {
+		err := DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
 
-	return
+		if err != nil {
+			return err
+		}
+
+		err = SelFile(s, co.XBuff, y, currFs[currF])
+
+		if err != nil {
+			return err
+		}
+	}
+	s.Show()
+
+	return nil
 }
 
 func BorderPipes(s tcell.Screen) {
@@ -314,14 +260,18 @@ func BorderPipes(s tcell.Screen) {
 
 	if co.PipeText != "" {
 		user := os.Getenv("USER")
-		host, _ := os.Hostname()
+		host, err := os.Hostname()
 
 		var text string
 
 		if co.PipeText == "user@host" {
-			text = user + "@" + host
+			if err == nil {
+				text = user + "@" + host
+			}
 		} else if co.PipeText == "catfm@host" {
-			text = "catfm@" + host
+			if err == nil {
+				text = "catfm@" + host
+			}
 		} else if co.PipeText == "user@catfm" {
 			text = user + "@catfm"
 		} else {
