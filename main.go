@@ -288,8 +288,9 @@ func main() {
 						}
 					} else {
 						c := make(chan error)
+
 						go func(c chan error) {
-							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile, len(currFiles))
+							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+2, len(currFiles))
 						}(c)
 
 						err := <-c
@@ -325,6 +326,7 @@ func main() {
 						}
 					} else {
 						c := make(chan error)
+
 						go func(c chan error) {
 							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile, len(currFiles))
 						}(c)
