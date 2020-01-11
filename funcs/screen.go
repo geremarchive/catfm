@@ -121,8 +121,17 @@ func DSelFile(s tcell.Screen, x int, y int, file string) error {
 func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr int, total int) error {
 	var x int = co.XBuff
 	var elemOutput string
+	var loc int
+
 	width, y := s.Size()
-	Addstr(s, tcell.StyleDefault, co.XBuff, y-(co.YBuffBottom)+1, strings.Repeat(" ", barLen))
+
+	if co.BarLocale == "bottom" {
+		loc = y-(co.YBuffBottom)+1
+	} else if co.BarLocale == "top" {
+		loc = co.YBuffTop-2
+	}
+
+	Addstr(s, tcell.StyleDefault, co.XBuff, loc, strings.Repeat(" ", barLen))
 
 	keys := make([]string, len(elements))
 
@@ -170,16 +179,16 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			elemOutput = strings.Replace(elemOutput, "$FILE", file, -1)
 		}
 
-		Addstr(s, elements[k], x, y-(co.YBuffBottom)+1, elemOutput)
+		Addstr(s, elements[k], x, loc, elemOutput)
 		if num, _ := strconv.Atoi(string(k[0])); num != len(keys) {
-			Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), y-(co.YBuffBottom)+1, co.BarDiv)
+			Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), loc, co.BarDiv)
 			x += len(elemOutput + co.BarDiv)
 		} else {
 			x += len(elemOutput)
 		}
 	}
 	if x > width {
-		Addstr(s, tcell.StyleDefault.Background(co.BarBg), width-3, y-(co.YBuffBottom)+1, "...")
+		Addstr(s, tcell.StyleDefault.Background(co.BarBg), width-3, loc, "...")
 	}
 	barLen = x
 

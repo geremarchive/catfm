@@ -34,6 +34,7 @@ var (
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
 
+	BarLocale = "bottom" // top or bottom
 	BarBg tcell.Color = tcell.ColorWhite
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
