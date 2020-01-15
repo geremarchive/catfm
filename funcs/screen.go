@@ -275,29 +275,29 @@ func BorderPipes(s tcell.Screen) {
 		}
 
 		s.Show()
-	}
 
-	if co.PipeText != "" {
-		user := os.Getenv("USER")
-		host, err := os.Hostname()
+		if co.PipeText != "" {
+			user := os.Getenv("USER")
+			host, err := os.Hostname()
 
-		var text string
+			var text string
 
-		if co.PipeText == "user@host" {
-			if err == nil {
-				text = user + "@" + host
+			if co.PipeText == "user@host" {
+				if err == nil {
+					text = user + "@" + host
+				}
+			} else if co.PipeText == "catfm@host" {
+				if err == nil {
+					text = "catfm@" + host
+				}
+			} else if co.PipeText == "user@catfm" {
+				text = user + "@catfm"
+			} else {
+				text = co.PipeText
 			}
-		} else if co.PipeText == "catfm@host" {
-			if err == nil {
-				text = "catfm@" + host
-			}
-		} else if co.PipeText == "user@catfm" {
-			text = user + "@catfm"
-		} else {
-			text = co.PipeText
+
+			Addstr(s, co.PipeTextStyle, 1, 0, text)
+			s.Show()
 		}
-
-		Addstr(s, co.PipeTextStyle, 1, 0, text)
-		s.Show()
 	}
 }
