@@ -34,7 +34,7 @@ var (
 	KeyUp rune = 'k'
 	KeyRight rune = 'l'
 
-	BarLocale = "bottom" // top or bottom
+	BarLocale = "bottom" // top or bottom ("" to disable the bar)
 	BarBg tcell.Color = tcell.ColorWhite
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
@@ -47,7 +47,7 @@ var (
 		"2size": tcell.StyleDefault.Background(BarBg),
 		"3mode": tcell.StyleDefault.Background(BarBg),
 
-		// Other elements: total
+		// Other elements: total, view
 		// Variables: $HOST, $USER, $FILE
 	}
 
@@ -62,6 +62,7 @@ var (
 	PipeTextStyle = tcell.StyleDefault
 
 	Shell string = "sh" // Shell that will be used to execute commands
+	TildeHome bool = true // replace /home/user with "~"
 
 	FileOpen = map[string][]string {
 		// Key is the file type, formatted like "jpg"
@@ -75,9 +76,7 @@ var (
 	}
 
 	Bindings = map[rune][]string {
-		'1': []string{"cd", "~"}, // "cd" into the home directory when the user presses '1'
+		'~': []string{"cd", "~"}, // "cd" into the home directory when the user presses '1'
 		'v': []string{"t", "less '@'"}, // View the selected file in less when 'v' is pressed
 	}
-
-	Selected []string
 )

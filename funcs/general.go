@@ -107,7 +107,7 @@ func FormatText(s tcell.Screen, text string, sel bool) (string, error) {
 }
 
 func IsSel(path string) bool {
-	_, in := In(path, co.Selected)
+	_, in := In(path, Selected)
 	return in
 }
 

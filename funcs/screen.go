@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"os/exec"
+	"os/user"
 	"code.cloudfoundry.org/bytefmt"
 	co "catfm/config"
 )
@@ -129,6 +130,8 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 		loc = y-(co.YBuffBottom)+1
 	} else if co.BarLocale == "top" {
 		loc = co.YBuffTop-2
+	} else if co.BarLocale == "" {
+		loc = y+5
 	}
 
 	Addstr(s, tcell.StyleDefault, co.XBuff, loc, strings.Repeat(" ", barLen))
@@ -142,14 +145,46 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 	}
 	sort.Strings(keys)
 
+	var err error
+
 	for _, k := range keys {
 		if k[1:] == "cwd" {
-			elemOutput, _ = os.Getwd()
+			if co.TildeHome {
+				u, err := user.Current()
+
+				if err != nil {
+					return err
+				}
+
+				ucwd, err := os.Getwd()
+
+				if err != nil {
+					return err
+				}
+
+				elemOutput = strings.Replace(ucwd, u.HomeDir, "~", -1)
+			} else {
+				elemOutput, err = os.Getwd()
+
+				if err != nil {
+					return err
+				}
+			}
 		} else if k[1:] == "size" {
-			f, _ := os.Stat(file)
+			f, err := os.Stat(file)
+
+			if err != nil {
+				return err
+			}
+
 			elemOutput = bytefmt.ByteSize(uint64(f.Size()))
 		} else if k[1:] == "mode" {
-			f, _ := os.Stat(file)
+			f, err := os.Stat(file)
+
+			if err != nil {
+				return err
+			}
+
 			elemOutput = f.Mode().String()
 		} else if k[1:] == "total" {
 			elemOutput = strconv.Itoa(curr) + "/" + strconv.Itoa(total)
@@ -157,6 +192,8 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			replacedString := strings.Replace(k, "@", file, -1)
 			cmdOutput, _ := exec.Command("dash", "-c", replacedString[2:len(replacedString)-1]).Output()
 			elemOutput = string(cmdOutput)
+		} else if k[1:] == "view" {
+			elemOutput = "[" + strconv.Itoa(ViewNumber+1) + "]"
 		} else {
 			elemOutput = k[1:]
 		}
@@ -179,6 +216,10 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			elemOutput = strings.Replace(elemOutput, "$FILE", file, -1)
 		}
 
+		if strings.Contains(k[1:], "$VIEW") {
+			elemOutput = strings.Replace(elemOutput, "$VIEW", "test", -1)
+		}
+
 		Addstr(s, elements[k], x, loc, elemOutput)
 		if num, _ := strconv.Atoi(string(k[0])); num != len(keys) {
 			Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), loc, co.BarDiv)
@@ -195,17 +236,17 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 	return nil
 }
 
-func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf2 int) error {
+func DrawScreen(s tcell.Screen, v View) error {
 	s.Clear()
 
 	c := make(chan error)
 	var err error
 
 	go func(c chan error) {
-		if buf1 == 0 {
-			err = DispFiles(s, currFs)
+		if v.Buffer1 == 0 {
+			err = DispFiles(s, v.Files)
 		} else {
-			err = DispFiles(s, currFs[buf1:buf2+1])
+			err = DispFiles(s, v.Files[v.Buffer1:v.Buffer2+1])
 		}
 
 		c <- err
@@ -219,14 +260,14 @@ func DrawScreen(s tcell.Screen, currFs []string, currF int, y int, buf1 int, buf
 
 	go BorderPipes(s)
 
-	if len(currFs) > 0 {
-		err := DispBar(s, co.BarStyle, currFs[currF], currF+1, len(currFs))
+	if len(v.Files) > 0 {
+		err := DispBar(s, co.BarStyle, v.Files[v.File], v.File+1, len(v.Files))
 
 		if err != nil {
 			return err
 		}
 
-		err = SelFile(s, co.XBuff, y, currFs[currF])
+		err = SelFile(s, co.XBuff, v.Y, v.Files[v.File])
 
 		if err != nil {
 			return err

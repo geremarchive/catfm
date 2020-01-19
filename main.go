@@ -23,24 +23,12 @@ import (
 	"github.com/gdamore/tcell"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 	"fmt"
 	fu "catfm/funcs"
 	co "catfm/config"
 	cp "github.com/otiai10/copy"
-)
-
-var (
-	currFile int
-	currY int = co.YBuffTop
-
-	b1 int
-	b2 int
-
-	width int
-	height int
-
-	dot bool = false
 )
 
 func main() {
@@ -58,7 +46,7 @@ func main() {
 		panic(err)
 	}
 
-	currFiles, err := fu.GetFiles(cwd, dot)
+	files, err := fu.GetFiles(cwd, false)
 
 	if err != nil {
 		panic(err)
@@ -84,10 +72,30 @@ func main() {
 
 	defer s.Fini()
 
-	width, height = s.Size()
-	b2 = (height-co.YBuffBottom)
+	width, height := s.Size()
 
-	if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+	Views := []fu.View{}
+
+	currView := fu.View {
+		File: 0,
+		Files: files,
+
+		Buffer1: 0,
+		Buffer2: height-co.YBuffBottom,
+
+		Y: co.YBuffTop,
+		Dot: false,
+		Cwd: cwd,
+
+		Width: width,
+		Height: height,
+	}
+
+	for i := 0; i < 10; i++ {
+		Views = append(Views, currView)
+	}
+
+	if err := fu.DrawScreen(s, currView); err != nil {
 		panic(err)
 	}
 
@@ -97,19 +105,22 @@ func main() {
 		nw, nh := s.Size()
 		if width != nw && height == nh {
 			width, height = nw, nh
+			currView.Width, currView.Height = nw, nh
 
-			if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+			if err := fu.DrawScreen(s, currView); err != nil {
 				panic(err)
 			}
 			fu.BorderPipes(s)
-		} else if height != nh && width != nh {
+		} else if height != nh {
 			width, height = nw, nh
-			b1 = 0
-			b2 = (height-co.YBuffBottom)+co.YBuffTop
-			currY = co.YBuffTop
-			currFile = 0
+			currView.Width, currView.Height = nw, nh
 
-			if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+			currView.Buffer1 = 0
+			currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+			currView.Y = co.YBuffTop
+			currView.File = 0
+
+			if err := fu.DrawScreen(s, currView); err != nil {
 				panic(err)
 			}
 
@@ -131,7 +142,7 @@ func main() {
 						os.Exit(0)
 					} else {
 
-						_, err := file.WriteString(cwd)
+						_, err := file.WriteString(currView.Cwd)
 
 						if err != nil {
 							fmt.Println("Couldn't write to /tmp/kitty")
@@ -140,39 +151,39 @@ func main() {
 
 					os.Exit(0)
 				} else if input.Rune() == co.KeyDelete {
-					err := os.RemoveAll(currFiles[currFile])
+					err := os.RemoveAll(currView.Files[currView.File])
 
 					if err == nil {
-						if index, in := fu.In(currFiles[currFile], co.Selected); in {
-							co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
+						if index, in := fu.In(currView.Files[currView.File], fu.Selected); in {
+							fu.Selected = append(fu.Selected[:index], fu.Selected[index+1:]...)
 						}
 
-						currFiles = append(currFiles[:currFile], currFiles[currFile+1:]...)
+						currView.Files = append(currView.Files[:currView.File], currView.Files[currView.File+1:]...)
 
 						s.Clear()
 
-						if currFile == len(currFiles) && b1 == 0 {
-							currY -= 1
-							currFile -= 1
-						} else if currFile == len(currFiles) {
-							b1 -= 1
-							b2 -= 1
-							currFile -= 1
+						if currView.File == len(currView.Files) && currView.Buffer1 == 0 {
+							currView.Y -= 1
+							currView.File -= 1
+						} else if currView.File == len(currView.Files) {
+							currView.Buffer1 -= 1
+							currView.Buffer2 -= 1
+							currView.File -= 1
 						}
 
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						if err := fu.DrawScreen(s, currView); err != nil {
 								panic(err)
 						}
 
 						s.Show()
 					}
 				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
-					for _, elem := range co.Selected {
+					for _, elem := range fu.Selected {
 						split := strings.Split(elem, "/")
 						if input.Rune() == co.KeyCopy {
-							err = cp.Copy(elem, cwd + "/" + split[len(split)-1])
+							err = cp.Copy(elem, currView.Cwd + "/" + split[len(split)-1])
 						} else if input.Rune() == co.KeyMove {
-							err = cp.Copy(elem, cwd + "/" + split[len(split)-1])
+							err = cp.Copy(elem, currView.Cwd + "/" + split[len(split)-1])
 							err = os.RemoveAll(elem)
 						} else if input.Rune() == co.KeyBulkDelete {
 							err = os.RemoveAll(elem)
@@ -180,117 +191,117 @@ func main() {
 					}
 
 					if err == nil {
-						co.Selected = []string{}
-						currFiles, err = fu.GetFiles(cwd, dot)
+						fu.Selected = []string{}
+						currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 						if err != nil {
 							panic(err)
 						}
 
-						currY = co.YBuffTop
-						currFile = 0
+						currView.Y = co.YBuffTop
+						currView.File = 0
 
-						b1, b2 = 0, height - co.YBuffBottom
+						currView.Buffer1, currView.Buffer2 = 0, height - co.YBuffBottom
 
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						if err := fu.DrawScreen(s, currView); err != nil {
 							panic(err)
 						}
 					}
 				} else if input.Rune() == co.KeySelect {
-					if fu.IsSel(cwd + "/" + currFiles[currFile]) {
-						index, _ := fu.In(cwd + "/" + currFiles[currFile], co.Selected)
-						co.Selected = append(co.Selected[:index], co.Selected[index+1:]...)
+					if fu.IsSel(currView.Cwd + "/" + currView.Files[currView.File]) {
+						index, _ := fu.In(currView.Cwd + "/" + currView.Files[currView.File], fu.Selected)
+						fu.Selected = append(fu.Selected[:index], fu.Selected[index+1:]...)
 					} else {
-						co.Selected = append(co.Selected, cwd + "/" + currFiles[currFile])
+						fu.Selected = append(fu.Selected, currView.Cwd + "/" + currView.Files[currView.File])
 					}
 
-					formated, err := fu.FormatText(s, currFiles[currFile], false)
+					formated, err := fu.FormatText(s, currView.Files[currView.File], false)
 
 					if err == nil {
 						if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
+							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currView.Y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
 						} else {
-							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currY, formated + " ")
+							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currView.Y, formated + " ")
 						}
 
-						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 							panic(err)
 						}
 						s.Show()
 					}
 				} else if input.Rune() == co.KeySelectAll {
-					for _, elem := range currFiles {
-						if _, in := fu.In(cwd + "/" + elem, co.Selected); !in {
-							co.Selected = append(co.Selected, cwd + "/" + elem)
+					for _, elem := range currView.Files {
+						if _, in := fu.In(currView.Cwd + "/" + elem, fu.Selected); !in {
+							fu.Selected = append(fu.Selected, currView.Cwd + "/" + elem)
 						}
 					}
 
-					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
 				} else if input.Rune() == co.KeyDeselectAll {
-					co.Selected = []string{}
+					fu.Selected = []string{}
 
-					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
 				} else if input.Rune() == co.KeyDotToggle {
-					dot = !(dot)
-					currFiles, err = fu.GetFiles(cwd, dot)
+					currView.Dot = !(currView.Dot)
+					currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 					if err == nil {
-						b1 = 0
-						b2 = (height-co.YBuffBottom)+co.YBuffTop
-						currFile = 0
-						currY = co.YBuffTop
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						currView.Buffer1 = 0
+						currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+						currView.File = 0
+						currView.Y = co.YBuffTop
+						if err := fu.DrawScreen(s, currView); err != nil {
 							panic(err)
 						}
 					}
 				} else if input.Rune() == co.KeyGoToFirst {
-					currFile = 0
-					currY = co.YBuffTop
+					currView.File = 0
+					currView.Y = co.YBuffTop
 
-					b1 = 0
-					b2 = height - co.YBuffTop
+					currView.Buffer1 = 0
+					currView.Buffer2 = height - co.YBuffTop
 
-					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if input.Rune() == co.KeyGoToLast && currFile < len(currFiles)-1 {
-					currFile = len(currFiles)-1
+				} else if input.Rune() == co.KeyGoToLast && currView.File < len(currView.Files)-1 {
+					currView.File = len(currView.Files)-1
 
-					if len(currFiles) + co.YBuffTop + co.YBuffBottom > height {
-						currY = height - (co.YBuffBottom + 1)
+					if len(currView.Files) + co.YBuffTop + co.YBuffBottom > height {
+						currView.Y = height - (co.YBuffBottom + 1)
 
-						b1 = (len(currFiles))-(height-(co.YBuffTop+co.YBuffBottom))
-						b2 = len(currFiles)-1
+						currView.Buffer1 = (len(currView.Files))-(height-(co.YBuffTop+co.YBuffBottom))
+						currView.Buffer2 = len(currView.Files)-1
 					} else {
-						currY = currFile + co.YBuffTop
+						currView.Y = currView.File + co.YBuffTop
 					}
 
-					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currFiles) != 0 {
-					if currFile == len(currFiles)-1 {
+				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currView.Files) != 0 {
+					if currView.File == len(currView.Files)-1 {
 						continue
-					} else if currY == (height-1)-co.YBuffBottom {
-						b1 += 1
-						if b2 >= len(currFiles)-1 {
-							b2 = len(currFiles)-1
+					} else if currView.Y == (height-1)-co.YBuffBottom {
+						currView.Buffer1 += 1
+						if currView.Buffer2 >= len(currView.Files)-1 {
+							currView.Buffer2 = len(currView.Files)-1
 						} else {
-							b2 += 1
+							currView.Buffer2 += 1
 						}
-						currFile += 1
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						currView.File += 1
+						if err := fu.DrawScreen(s, currView); err != nil {
 							panic(err)
 						}
 					} else {
 						c := make(chan error)
 
 						go func(c chan error) {
-							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile+1], currFile+2, len(currFiles))
+							c <- fu.DispBar(s, co.BarStyle, currView.Files[currView.File+1], currView.File+2, len(currView.Files))
 						}(c)
 
 						err := <-c
@@ -299,36 +310,36 @@ func main() {
 							panic(err)
 						}
 
-						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if err := fu.DSelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 							panic(err)
 						}
 
-						currY += 1
-						currFile += 1
+						currView.Y += 1
+						currView.File += 1
 
-						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 							panic(err)
 						}
 
 						s.Show()
 					}
 
-				} else if (input.Key() == tcell.KeyUp || input.Rune() == co.KeyUp) && len(currFiles) != 0 {
-					if currFile == 0 {
+				} else if (input.Key() == tcell.KeyUp || input.Rune() == co.KeyUp) && len(currView.Files) != 0 {
+					if currView.File == 0 {
 						continue
-					} else if currY == co.YBuffTop {
-						b1 -= 1
-						b2 -= 1
-						currFile -= 1
+					} else if currView.Y == co.YBuffTop {
+						currView.Buffer1 -= 1
+						currView.Buffer2 -= 1
+						currView.File -= 1
 
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						if err := fu.DrawScreen(s, currView); err != nil {
 							panic(err)
 						}
 					} else {
 						c := make(chan error)
 
 						go func(c chan error) {
-							c <- fu.DispBar(s, co.BarStyle, currFiles[currFile-1], currFile, len(currFiles))
+							c <- fu.DispBar(s, co.BarStyle, currView.Files[currView.File-1], currView.File, len(currView.Files))
 						}(c)
 
 						err := <-c
@@ -337,64 +348,64 @@ func main() {
 							panic(err)
 						}
 
-						if err := fu.DSelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if err := fu.DSelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 							panic(err)
 						}
 
-						currY -= 1
-						currFile -= 1
+						currView.Y -= 1
+						currView.File -= 1
 
-						if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 							panic(err)
 						}
 
 						s.Show()
 					}
-				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currFiles) != 0 {
-					if fu.Isd(currFiles[currFile]) {
-						err := os.Chdir(currFiles[currFile])
+				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currView.Files) != 0 {
+					if fu.Isd(currView.Files[currView.File]) {
+						err := os.Chdir(currView.Files[currView.File])
 
 						if err == nil {
 
-							cwd, err = os.Getwd()
+							currView.Cwd, err = os.Getwd()
 
 							if err != nil {
 								panic(err)
 							}
 
-							currFiles, err = fu.GetFiles(cwd, dot)
+							currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 							if err != nil {
 								panic(err)
 							}
 
-							b1 = 0
-							b2 = (height-co.YBuffBottom)+co.YBuffTop
-							currFile = 0
-							currY = co.YBuffTop
+							currView.Buffer1 = 0
+							currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+							currView.File = 0
+							currView.Y = co.YBuffTop
 
 							s.Clear()
 
-							if err := fu.DispFiles(s, currFiles); err != nil {
+							if err := fu.DispFiles(s, currView.Files); err != nil {
 								panic(err)
 							}
 
 							fu.BorderPipes(s)
 						}
 
-						if len(currFiles) != 0 {
-							if err := fu.SelFile(s, co.XBuff, currY, currFiles[currFile]); err != nil {
+						if len(currView.Files) != 0 {
+							if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
 								panic(err)
 							}
 
-							if err := fu.DispBar(s, co.BarStyle, currFiles[currFile], currFile+1, len(currFiles)); err != nil {
+							if err := fu.DispBar(s, co.BarStyle, currView.Files[currView.File], currView.File+1, len(currView.Files)); err != nil {
 								panic(err)
 							}
 						}
 						s.Show()
 					} else {
 						var command []string = co.FileOpen["*"]
-						splitFile := strings.Split(currFiles[currFile], ".")
+						splitFile := strings.Split(currView.Files[currView.File], ".")
 						for k, v := range co.FileOpen {
 							if k == splitFile[len(splitFile)-1] {
 								command = v
@@ -402,7 +413,7 @@ func main() {
 							}
 						}
 
-						replacedString := strings.Replace(command[1], "@", currFiles[currFile], -1)
+						replacedString := strings.Replace(command[1], "@", currView.Files[currView.File], -1)
 						cmd := exec.Command(co.Shell, "-c", replacedString)
 
 						if command[0] == "t" {
@@ -418,7 +429,7 @@ func main() {
 							}
 
 							s.Init()
-							if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+							if err := fu.DrawScreen(s, currView); err != nil {
 								panic(err)
 							}
 
@@ -431,72 +442,125 @@ func main() {
 					err := os.Chdir("..")
 
 					if err == nil {
-						cwd, err = os.Getwd()
+						currView.Cwd, err = os.Getwd()
 
 						if err != nil {
 							panic(err)
 						}
 
-						currFiles, err = fu.GetFiles(cwd, dot)
+						currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 						if err != nil {
 							panic(err)
 						}
 
-						b1 = 0
-						b2 = (height-co.YBuffBottom)+co.YBuffTop
-						currFile = 0
-						currY = co.YBuffTop
+						currView.Buffer1 = 0
+						currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+						currView.File = 0
+						currView.Y = co.YBuffTop
 
-						if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+						if err := fu.DrawScreen(s, currView); err != nil {
 							panic(err)
 						}
 
 					}
-				} else if input.Rune() == co.KeyRefresh && len(currFiles) != 0 {
-					currFile = 0
+				} else if input.Rune() == co.KeyRefresh && len(currView.Files) != 0 {
+					currView.File = 0
 
-					b1 = 0
-					b2 = height-co.YBuffBottom
+					currView.Buffer1 = 0
+					currView.Buffer2 = height-co.YBuffBottom
 
-					currFiles, err = fu.GetFiles(cwd, dot)
+					currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 					if err != nil {
 						panic(err)
 					}
 
-					currY = co.YBuffTop
+					currView.Y = co.YBuffTop
 
-					if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+					if err := fu.DrawScreen(s, currView); err != nil {
+						panic(err)
+					}
+				} else if input.Rune() >= 48 && input.Rune() <= 57 {
+					Views[fu.ViewNumber] = currView
+
+					switch input.Rune() {
+					case '1':
+						fu.ViewNumber = 0
+					case '2':
+						fu.ViewNumber = 1
+					case '3':
+						fu.ViewNumber = 2
+					case '4':
+						fu.ViewNumber = 3
+					case '5':
+						fu.ViewNumber = 4
+					case '6':
+						fu.ViewNumber = 5
+					case '7':
+						fu.ViewNumber = 6
+					case '8':
+						fu.ViewNumber = 7
+					case '9':
+						fu.ViewNumber = 8
+					case '0':
+						fu.ViewNumber = 9
+					}
+
+					currView = Views[fu.ViewNumber]
+
+					if err := os.Chdir(currView.Cwd); err != nil {
+						panic(err)
+					}
+
+					if currView.Width != width && currView.Height == height {
+						currView.Width = width
+					} else if currView.Height != height {
+						currView.Width, currView.Height = width, height
+
+						currView.Buffer1 = 0
+						currView.Buffer2 = height-co.YBuffBottom
+
+						currView.File = 0
+						currView.Y = co.YBuffTop
+					}
+
+					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
 				} else {
 					for k, v := range co.Bindings {
 						if k == input.Rune() {
-							replacedString := strings.Replace(v[1], "@", currFiles[currFile], -1)
+							replacedString := strings.Replace(v[1], "@", currView.Files[currView.File], -1)
 
 							if v[0] == "cd" {
-								err := os.Chdir(strings.Replace(string(v[1]), "~", os.Getenv("HOME"), -1))
+								u, err := user.Current()
+
+								if err != nil {
+									panic(err)
+								}
+
+								err = os.Chdir(strings.Replace(v[1], "~", u.HomeDir, -1))
 
 								if err == nil {
-									cwd, err = os.Getwd()
+									currView.Cwd, err = os.Getwd()
 
 									if err != nil {
 										panic(err)
 									}
 
-									currFiles, err = fu.GetFiles(cwd, dot)
+									currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 									if err != nil {
 										panic(err)
 									}
 
-									b1 = 0
-									b2 = (height-co.YBuffBottom)+co.YBuffTop
-									currFile = 0
-									currY = co.YBuffTop
+									currView.Buffer1 = 0
+									currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+									currView.File = 0
+									currView.Y = co.YBuffTop
 
-									if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+									if err := fu.DrawScreen(s, currView); err != nil {
 										panic(err)
 									}
 								}
@@ -519,7 +583,7 @@ func main() {
 
 								s.Init()
 
-								if err := fu.DrawScreen(s, currFiles, currFile, currY, b1, b2); err != nil {
+								if err := fu.DrawScreen(s, currView); err != nil {
 									panic(err)
 								}
 							} else if v[0] == "g" {
