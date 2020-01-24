@@ -192,7 +192,7 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			replacedString := strings.Replace(k, "@", file, -1)
 			cmdOutput, _ := exec.Command("dash", "-c", replacedString[2:len(replacedString)-1]).Output()
 			elemOutput = string(cmdOutput)
-		} else if k[1:] == "view" {
+		} else if k[1:] == "tab" {
 			elemOutput = "[" + strconv.Itoa(ViewNumber+1) + "]"
 		} else {
 			elemOutput = k[1:]
@@ -216,8 +216,8 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			elemOutput = strings.Replace(elemOutput, "$FILE", file, -1)
 		}
 
-		if strings.Contains(k[1:], "$VIEW") {
-			elemOutput = strings.Replace(elemOutput, "$VIEW", "test", -1)
+		if strings.Contains(k[1:], "$TAB") {
+			elemOutput = strings.Replace(elemOutput, "$TAB", strconv.Itoa(ViewNumber+1), -1)
 		}
 
 		Addstr(s, elements[k], x, loc, elemOutput)

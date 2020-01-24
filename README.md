@@ -56,6 +56,8 @@ Move into the ```catfm/``` directory and type ```go build```
 
 You can configure the program in the ```config/config.go``` file before compiling. This speeds up the program as it doesn't have to read and parse a giant config file everytime you start up the program
 
+I also recommend looking at the [tcell](https://godoc.org/github.com/gdamore/tcell) documentation on [color](https://godoc.org/github.com/gdamore/tcell#Color) and [styles](https://godoc.org/github.com/gdamore/tcell#Style)
+
 ### ```cd``` on exit
 
 shell function (put this in your ```.shellrc```):
@@ -75,3 +77,5 @@ fm() {
 - [ ] Add file renaming
 - [X] Add ability to customize the keys for delete, move, copy, movement, etc.
 - [X] Move to top or bottom screen
+- [X] Add tabs
+- [ ] Improve config file and keybinds

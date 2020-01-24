@@ -115,10 +115,12 @@ func main() {
 			width, height = nw, nh
 			currView.Width, currView.Height = nw, nh
 
-			currView.Buffer1 = 0
-			currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
-			currView.Y = co.YBuffTop
-			currView.File = 0
+			if currView.Buffer1 != 0 || currView.File > currView.Height-(co.YBuffTop+co.YBuffBottom) {
+				currView.Buffer1 = 0
+				currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+				currView.Y = co.YBuffTop
+				currView.File = 0
+			}
 
 			if err := fu.DrawScreen(s, currView); err != nil {
 				panic(err)
@@ -518,11 +520,12 @@ func main() {
 					} else if currView.Height != height {
 						currView.Width, currView.Height = width, height
 
-						currView.Buffer1 = 0
-						currView.Buffer2 = height-co.YBuffBottom
-
-						currView.File = 0
-						currView.Y = co.YBuffTop
+						if currView.Buffer1 != 0 || currView.File > currView.Height-(co.YBuffTop+co.YBuffBottom) {
+							currView.Buffer1 = 0
+							currView.Buffer2 = height-co.YBuffBottom
+							currView.File = 0
+							currView.Y = co.YBuffTop
+						}
 					}
 
 					if err := fu.DrawScreen(s, currView); err != nil {

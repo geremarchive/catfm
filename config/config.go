@@ -47,8 +47,8 @@ var (
 		"2size": tcell.StyleDefault.Background(BarBg),
 		"3mode": tcell.StyleDefault.Background(BarBg),
 
-		// Other elements: total, view
-		// Variables: $HOST, $USER, $FILE
+		// Other elements: total, tab
+		// Variables: $HOST, $USER, $FILE, $TAP
 	}
 
 	SelectType string = "default" // full, default, arrow, arrow-default
