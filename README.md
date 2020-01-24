@@ -2,6 +2,7 @@
 
 <p align="center">a simple and programmable file manager written in Go</p>
 <img align="right" src="media/inuse.png">
+<br>
 
 ## About
 
