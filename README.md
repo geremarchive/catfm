@@ -1,15 +1,13 @@
 <h1 align="center">catfm 🐟</h1>
 
 <p align="center">a simple and programmable file manager written in Go</p>
-<img align="right" src="media/catfm.png">
+<img align="right" src="media/inuse.png">
 
 ## About
 
 catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emulate the pluto file manager that I started working on in late 2018. Pluto was slow and buggy so I decided that I needed to rewrite it from scratch in a new language. So voilà, you have catfm!
 
 ## Features
-
-catfm is feature rich, but still maintains simiplicity by giving the user complete control over the program. catfm's most interesting feature is that it doesn't have a configuration file, all configuration is done by editing the source code! This may sound scary but it is quite simple and makes a lot of sense when you start to think about it. Most programs load large files that contain all of the settings that the user has set, catfm avoids this by having the user embed all of their options in an easy to read and understand source file located in ```config/```. The config file isn't just for enabling and disabling features, it allows you to utilize you favorite programs, scripts, and commands all inside of catfm. Do you want catfm to pull up an image of you father-in-law's 70th birthday party when you press the 'Y' key? well it's possible in catfm! Catfm also has the following features:
 
 * Customizable file formating
 * Opening files in your favorite programs
