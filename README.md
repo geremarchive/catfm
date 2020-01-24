@@ -1,8 +1,7 @@
 <h1 align="center">catfm 🐟</h1>
 
 <p align="center">a simple and programmable file manager written in Go</p>
-<img align="right" src="media/inuse.png">
-<br>
+<img src="media/inuse.png">
 
 ## About
 
