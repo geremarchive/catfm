@@ -19,7 +19,7 @@ catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emu
 
 ## Dependencies 
 
-* ```go```
+* ```go 1.13```
 * ```tcell```
 * ```bytefmt```
 * ```copy```
@@ -48,7 +48,7 @@ catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emu
 
 **Build the program**
 
-Move into the ```catfm/``` directory and type ```go build```
+Move into the ```catfm/``` directory and type ```go mod init``` and then ```go build```
 
 **Move the binary to somewhere in your path**
 
