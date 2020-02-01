@@ -30,9 +30,7 @@ catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emu
 
 ```git clone http://github.com/geremachek/catfm```
 
-**Tnstall go from your distro's repositories: (Arch Linux for example)**
-
-```sudo pacman -S go```
+**Tnstall go from your distro's repositories:**
 
 **Install tcell:**
 
