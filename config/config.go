@@ -40,7 +40,7 @@ var (
 	BarDiv string = " "
 	BarStyle = map[string]tcell.Style{
 		// Make sure to order your elements!
-		// To get the output of a command/script (using dash), encolse the script in brackets
+		// To get the output of a command/script encolse the script in brackets
 		// To access the currently selected file use the "@" symbol, i.e. 1[ls -l @]
 
 		"1cwd": tcell.StyleDefault.Background(BarBg).Bold(true),
@@ -48,7 +48,7 @@ var (
 		"3mode": tcell.StyleDefault.Background(BarBg),
 
 		// Other elements: total, tab
-		// Variables: $HOST, $USER, $FILE, $TAP
+		// Variables: $HOST, $USER, $FILE, $TAB
 	}
 
 	SelectType string = "default" // full, default, arrow, arrow-default
@@ -76,7 +76,7 @@ var (
 	}
 
 	Bindings = map[rune][]string {
-		'~': []string{"cd", "~"}, // "cd" into the home directory when the user presses '1'
+		'~': []string{"cd", "~"}, // "cd" into the home directory when the user presses '~'
 		'v': []string{"t", "less '@'"}, // View the selected file in less when 'v' is pressed
 	}
 )
