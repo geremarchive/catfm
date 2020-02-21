@@ -16,23 +16,24 @@ var (
 	YBuffBottom int = 2 // Blank space on bottom (remember to make room for the bar!)
 
 	// Key bindings (arrow keys will always work for the movement functions)
+	// ctrl-a-z, home, f1-12
 
-	KeyRefresh rune = 'f'
-	KeyQuit rune = 'q'
-	KeyDelete rune = 'd'
-	KeyBulkDelete rune = 'D'
-	KeyCopy rune = 'C'
-	KeyMove rune = 'M'
-	KeySelect rune = ' '
-	KeySelectAll rune = '*'
-	KeyDeselectAll rune = '-'
-	KeyDotToggle rune = '.'
-	KeyGoToFirst rune = 'g'
-	KeyGoToLast rune = 'G'
-	KeyLeft rune = 'h'
-	KeyDown rune = 'j'
-	KeyUp rune = 'k'
-	KeyRight rune = 'l'
+	KeyRefresh string = "f"
+	KeyQuit string = "q"
+	KeyDelete string = "d"
+	KeyBulkDelete string = "D"
+	KeyCopy string = "C"
+	KeyMove string = "M"
+	KeySelect string = " "
+	KeySelectAll string = "*"
+	KeyDeselectAll string = "-"
+	KeyDotToggle string = "."
+	KeyGoToFirst string = "g"
+	KeyGoToLast string = "G"
+	KeyLeft string = "h"
+	KeyDown string = "j"
+	KeyUp string = "k"
+	KeyRight string = "l"
 
 	BarLocale = "bottom" // top or bottom ("" to disable the bar)
 	BarBg tcell.Color = tcell.ColorWhite
@@ -75,8 +76,8 @@ var (
 		"[dir]": tcell.StyleDefault.Foreground(tcell.GetColor("#508cbe")).Bold(true),
 	}
 
-	Bindings = map[rune][]string {
-		'~': []string{"cd", "~"}, // "cd" into the home directory when the user presses '~'
-		'v': []string{"t", "less '@'"}, // View the selected file in less when 'v' is pressed
+	Bindings = map[string][]string {
+		"~": []string{"cd", "~"}, // "cd" into the home directory when the user presses '~'
+		"v": []string{"t", "less '@'"}, // View the selected file in less when 'v' is pressed
 	}
 )

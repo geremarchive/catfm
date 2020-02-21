@@ -28,6 +28,7 @@ import (
 	"fmt"
 	fu "catfm/funcs"
 	co "catfm/config"
+	ke "catfm/keys"
 	cp "github.com/otiai10/copy"
 )
 
@@ -132,9 +133,8 @@ func main() {
 
 		switch input := input.(type) {
 			case *tcell.EventKey:
-				if input.Rune() == co.KeyQuit {
+				if ke.MatchKey(input, co.KeyQuit) {
 					s.Fini()
-
 					file, err := os.Create("/tmp/kitty")
 
 					defer file.Close()
@@ -152,7 +152,7 @@ func main() {
 					}
 
 					os.Exit(0)
-				} else if input.Rune() == co.KeyDelete {
+				} else if ke.MatchKey(input, co.KeyDelete) {
 					err := os.RemoveAll(currView.Files[currView.File])
 
 					if err == nil {
@@ -179,15 +179,15 @@ func main() {
 
 						s.Show()
 					}
-				} else if input.Rune() == co.KeyCopy || input.Rune() == co.KeyMove || input.Rune() == co.KeyBulkDelete {
+				} else if ke.MatchKey(input, co.KeyCopy) || ke.MatchKey(input, co.KeyMove) || ke.MatchKey(input, co.KeyBulkDelete) {
 					for _, elem := range fu.Selected {
 						split := strings.Split(elem, "/")
-						if input.Rune() == co.KeyCopy {
+						if ke.MatchKey(input, co.KeyCopy) {
 							err = cp.Copy(elem, currView.Cwd + "/" + split[len(split)-1])
-						} else if input.Rune() == co.KeyMove {
+						} else if ke.MatchKey(input, co.KeyMove) {
 							err = cp.Copy(elem, currView.Cwd + "/" + split[len(split)-1])
 							err = os.RemoveAll(elem)
-						} else if input.Rune() == co.KeyBulkDelete {
+						} else if ke.MatchKey(input, co.KeyBulkDelete) {
 							err = os.RemoveAll(elem)
 						}
 					}
@@ -209,7 +209,7 @@ func main() {
 							panic(err)
 						}
 					}
-				} else if input.Rune() == co.KeySelect {
+				} else if ke.MatchKey(input, co.KeySelect) {
 					if fu.IsSel(currView.Cwd + "/" + currView.Files[currView.File]) {
 						index, _ := fu.In(currView.Cwd + "/" + currView.Files[currView.File], fu.Selected)
 						fu.Selected = append(fu.Selected[:index], fu.Selected[index+1:]...)
@@ -231,7 +231,7 @@ func main() {
 						}
 						s.Show()
 					}
-				} else if input.Rune() == co.KeySelectAll {
+				} else if ke.MatchKey(input, co.KeySelectAll) {
 					for _, elem := range currView.Files {
 						if _, in := fu.In(currView.Cwd + "/" + elem, fu.Selected); !in {
 							fu.Selected = append(fu.Selected, currView.Cwd + "/" + elem)
@@ -241,13 +241,13 @@ func main() {
 					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if input.Rune() == co.KeyDeselectAll {
+				} else if ke.MatchKey(input, co.KeyDeselectAll) {
 					fu.Selected = []string{}
 
 					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if input.Rune() == co.KeyDotToggle {
+				} else if ke.MatchKey(input, co.KeyDotToggle) {
 					currView.Dot = !(currView.Dot)
 					currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
@@ -260,7 +260,7 @@ func main() {
 							panic(err)
 						}
 					}
-				} else if input.Rune() == co.KeyGoToFirst {
+				} else if ke.MatchKey(input, co.KeyGoToFirst) {
 					currView.File = 0
 					currView.Y = co.YBuffTop
 
@@ -270,7 +270,7 @@ func main() {
 					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if input.Rune() == co.KeyGoToLast && currView.File < len(currView.Files)-1 {
+				} else if ke.MatchKey(input, co.KeyGoToLast) && currView.File < len(currView.Files)-1 {
 					currView.File = len(currView.Files)-1
 
 					if len(currView.Files) + co.YBuffTop + co.YBuffBottom > height {
@@ -285,7 +285,7 @@ func main() {
 					if err := fu.DrawScreen(s, currView); err != nil {
 						panic(err)
 					}
-				} else if (input.Key() == tcell.KeyDown || input.Rune() == co.KeyDown) && len(currView.Files) != 0 {
+				} else if (input.Key() == tcell.KeyDown || ke.MatchKey(input, co.KeyDown)) && len(currView.Files) != 0 {
 					if currView.File == len(currView.Files)-1 {
 						continue
 					} else if currView.Y == (height-1)-co.YBuffBottom {
@@ -326,7 +326,7 @@ func main() {
 						s.Show()
 					}
 
-				} else if (input.Key() == tcell.KeyUp || input.Rune() == co.KeyUp) && len(currView.Files) != 0 {
+				} else if (input.Key() == tcell.KeyUp || ke.MatchKey(input, co.KeyUp)) && len(currView.Files) != 0 {
 					if currView.File == 0 {
 						continue
 					} else if currView.Y == co.YBuffTop {
@@ -363,7 +363,7 @@ func main() {
 
 						s.Show()
 					}
-				} else if (input.Key() == tcell.KeyRight || input.Rune() == co.KeyRight) && len(currView.Files) != 0 {
+				} else if (input.Key() == tcell.KeyRight || ke.MatchKey(input, co.KeyRight)) && len(currView.Files) != 0 {
 					if fu.Isd(currView.Files[currView.File]) {
 						err := os.Chdir(currView.Files[currView.File])
 
@@ -440,7 +440,7 @@ func main() {
 							cmd.Start()
 						}
 					}
-				} else if input.Key() == tcell.KeyLeft || input.Rune() == co.KeyLeft {
+				} else if input.Key() == tcell.KeyLeft || ke.MatchKey(input, co.KeyLeft) {
 					err := os.Chdir("..")
 
 					if err == nil {
@@ -466,7 +466,7 @@ func main() {
 						}
 
 					}
-				} else if input.Rune() == co.KeyRefresh && len(currView.Files) != 0 {
+				} else if ke.MatchKey(input, co.KeyRefresh) && len(currView.Files) != 0 {
 					currView.File = 0
 
 					currView.Buffer1 = 0
@@ -533,8 +533,11 @@ func main() {
 					}
 				} else {
 					for k, v := range co.Bindings {
-						if k == input.Rune() {
-							replacedString := strings.Replace(v[1], "@", currView.Files[currView.File], -1)
+						if ke.MatchKey(input, k) {
+							replacedString := v[1]
+							if len(currView.Files) != 0 {
+								replacedString = strings.Replace(v[1], "@", currView.Files[currView.File], -1)
+							}
 
 							if v[0] == "cd" {
 								u, err := user.Current()
