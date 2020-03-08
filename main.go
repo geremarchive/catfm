@@ -6,7 +6,7 @@ Welcome To The Catfm Source Code
 
 Info:
 
-∙ This project was created and is maintained by geremachek (gmk).
+∙ This project was created and is maintained by Jonah G. Rongstad (geremachek).
 ∙ Catfm is registered under the GPL v. 3 witch means you are free to modify and distribute it and its source code
 ∙ This project was based on the now deprecated pluto file-manager and shares a lot of the core design ideas of that file-manager
 
@@ -41,6 +41,8 @@ func main() {
 		}
 	}
 
+	co.Init()
+
 	cwd, err := os.Getwd()
 
 	if err != nil {
@@ -60,7 +62,6 @@ func main() {
 	}
 
 	s.Init()
-
 	s.Fini()
 
 	s, err = tcell.NewScreen()
@@ -261,33 +262,12 @@ func main() {
 						}
 					}
 				} else if ke.MatchKey(input, co.KeyGoToFirst) {
-					currView.File = 0
-					currView.Y = co.YBuffTop
-
-					currView.Buffer1 = 0
-					currView.Buffer2 = height - co.YBuffTop
-
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
-					}
+					currView.GoToFirst(s)
 				} else if ke.MatchKey(input, co.KeyGoToLast) && currView.File < len(currView.Files)-1 {
-					currView.File = len(currView.Files)-1
-
-					if len(currView.Files) + co.YBuffTop + co.YBuffBottom > height {
-						currView.Y = height - (co.YBuffBottom + 1)
-
-						currView.Buffer1 = (len(currView.Files))-(height-(co.YBuffTop+co.YBuffBottom))
-						currView.Buffer2 = len(currView.Files)-1
-					} else {
-						currView.Y = currView.File + co.YBuffTop
-					}
-
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
-					}
+					currView.GoToLast(s)
 				} else if (input.Key() == tcell.KeyDown || ke.MatchKey(input, co.KeyDown)) && len(currView.Files) != 0 {
 					if currView.File == len(currView.Files)-1 {
-						continue
+						currView.GoToFirst(s)
 					} else if currView.Y == (height-1)-co.YBuffBottom {
 						currView.Buffer1 += 1
 						if currView.Buffer2 >= len(currView.Files)-1 {
@@ -328,7 +308,7 @@ func main() {
 
 				} else if (input.Key() == tcell.KeyUp || ke.MatchKey(input, co.KeyUp)) && len(currView.Files) != 0 {
 					if currView.File == 0 {
-						continue
+						currView.GoToLast(s)
 					} else if currView.Y == co.YBuffTop {
 						currView.Buffer1 -= 1
 						currView.Buffer2 -= 1

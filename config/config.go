@@ -8,7 +8,9 @@
 
 package config
 
-import "github.com/gdamore/tcell"
+import (
+	"github.com/gdamore/tcell"
+)
 
 var (
 	XBuff int = 0 // Blank space on sides
@@ -36,7 +38,7 @@ var (
 	KeyRight string = "l"
 
 	BarLocale = "bottom" // top or bottom ("" to disable the bar)
-	BarBg tcell.Color = tcell.ColorWhite
+	BarBg tcell.Color = tcell.GetColor("#0000ff")
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
 	BarStyle = map[string]tcell.Style{
@@ -81,3 +83,8 @@ var (
 		"v": []string{"t", "less '@'"}, // View the selected file in less when 'v' is pressed
 	}
 )
+
+// This function runs when catfm is launched
+
+func Init() {
+}

@@ -229,7 +229,7 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 		}
 	}
 	if x > width {
-		Addstr(s, tcell.StyleDefault.Background(co.BarBg), width-3, loc, "...")
+		Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), width-3, loc, "...")
 	}
 	barLen = x
 
@@ -340,5 +340,37 @@ func BorderPipes(s tcell.Screen) {
 			Addstr(s, co.PipeTextStyle, 1, 0, text)
 			s.Show()
 		}
+	}
+}
+
+func (v *View) GoToLast(s tcell.Screen) {
+	_, height := s.Size()
+	v.File = len(v.Files) - 1
+
+	if len(v.Files) + co.YBuffTop + co.YBuffBottom > height {
+		v.Y = height - (co.YBuffBottom + 1)
+
+		v.Buffer1 = (len(v.Files))-(height-(co.YBuffTop+co.YBuffBottom))
+		v.Buffer2 = len(v.Files) - 1
+	} else {
+		v.Y = v.File + co.YBuffTop
+	}
+
+	if err := DrawScreen(s, *v); err != nil {
+		panic(err)
+	}
+}
+
+func (v *View) GoToFirst(s tcell.Screen) {
+	_, height := s.Size()
+
+	v.File = 0
+	v.Y = co.YBuffTop
+
+	v.Buffer1 = 0
+	v.Buffer2 = height - co.YBuffTop
+
+	if err := DrawScreen(s, *v); err != nil {
+		panic(err)
 	}
 }
