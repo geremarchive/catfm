@@ -154,7 +154,13 @@ func main() {
 					}
 
 					os.Exit(0)
-				} else if ke.MatchKey(input, co.KeyDelete) {
+				} else if ke.MatchKey(input, co.KeyDelete) || ke.MatchKey(input, co.KeyRecycle) {
+					if ke.MatchKey(input, co.KeyRecycle) && co.RecycleBin != "" {
+						if err := cp.Copy(currView.Files[currView.File], co.RecycleBin + "/" + currView.Files[currView.File]); err != nil {
+							fu.Errout(s, "unable to copy file")
+						}
+					}
+
 					err := os.RemoveAll(currView.Files[currView.File])
 
 					if err == nil {
