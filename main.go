@@ -97,8 +97,8 @@ func main() {
 		Views = append(Views, currView)
 	}
 
-	if err := fu.DrawScreen(s, currView); err != nil {
-		panic(err)
+	if err := currView.DrawScreen(s); err != nil {
+		fu.Errout(s, "unable to draw screen")
 	}
 
 	s.Show()
@@ -109,9 +109,10 @@ func main() {
 			width, height = nw, nh
 			currView.Width, currView.Height = nw, nh
 
-			if err := fu.DrawScreen(s, currView); err != nil {
-				panic(err)
+			if err := currView.DrawScreen(s); err != nil {
+				fu.Errout(s, "unable to draw screen")
 			}
+
 			fu.BorderPipes(s)
 		} else if height != nh {
 			width, height = nw, nh
@@ -124,8 +125,8 @@ func main() {
 				currView.File = 0
 			}
 
-			if err := fu.DrawScreen(s, currView); err != nil {
-				panic(err)
+			if err := currView.DrawScreen(s); err != nil {
+				fu.Errout(s, "unable to draw screen")
 			}
 
 			fu.BorderPipes(s)
@@ -141,14 +142,14 @@ func main() {
 					defer file.Close()
 
 					if err != nil {
-						fmt.Println("Couldn't create /tmp/kitty")
+						fmt.Println("catfm: couldn't create /tmp/kitty")
 						os.Exit(0)
 					} else {
 
 						_, err := file.WriteString(currView.Cwd)
 
 						if err != nil {
-							fmt.Println("Couldn't write to /tmp/kitty")
+							fmt.Println("catfm: couldn't write to /tmp/kitty")
 						}
 					}
 
@@ -174,8 +175,8 @@ func main() {
 							currView.File -= 1
 						}
 
-						if err := fu.DrawScreen(s, currView); err != nil {
-								panic(err)
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 
 						s.Show()
@@ -198,7 +199,7 @@ func main() {
 						currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 						if err != nil {
-							panic(err)
+							fu.Errout(s, "unable to read files")
 						}
 
 						currView.Y = co.YBuffTop
@@ -206,8 +207,8 @@ func main() {
 
 						currView.Buffer1, currView.Buffer2 = 0, height - co.YBuffBottom
 
-						if err := fu.DrawScreen(s, currView); err != nil {
-							panic(err)
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 					}
 				} else if ke.MatchKey(input, co.KeySelect) {
@@ -227,8 +228,8 @@ func main() {
 							fu.Addstr(s, tcell.StyleDefault, co.XBuff, currView.Y, formated + " ")
 						}
 
-						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-							panic(err)
+						if err := currView.SelFile(s); err != nil {
+							fu.Errout(s, "unable to calculate screen width")
 						}
 						s.Show()
 					}
@@ -239,14 +240,14 @@ func main() {
 						}
 					}
 
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
+					if err := currView.DrawScreen(s); err != nil {
+						fu.Errout(s, "couldn't draw screen")
 					}
 				} else if ke.MatchKey(input, co.KeyDeselectAll) {
 					fu.Selected = []string{}
 
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
+					if err := currView.DrawScreen(s); err != nil {
+						fu.Errout(s, "couldn't draw screen")
 					}
 				} else if ke.MatchKey(input, co.KeyDotToggle) {
 					currView.Dot = !(currView.Dot)
@@ -257,8 +258,9 @@ func main() {
 						currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
 						currView.File = 0
 						currView.Y = co.YBuffTop
-						if err := fu.DrawScreen(s, currView); err != nil {
-							panic(err)
+
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 					}
 				} else if ke.MatchKey(input, co.KeyGoToFirst) {
@@ -270,37 +272,40 @@ func main() {
 						currView.GoToFirst(s)
 					} else if currView.Y == (height-1)-co.YBuffBottom {
 						currView.Buffer1 += 1
+
 						if currView.Buffer2 >= len(currView.Files)-1 {
 							currView.Buffer2 = len(currView.Files)-1
 						} else {
 							currView.Buffer2 += 1
 						}
+
 						currView.File += 1
-						if err := fu.DrawScreen(s, currView); err != nil {
-							panic(err)
+
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 					} else {
 						c := make(chan error)
 
 						go func(c chan error) {
-							c <- fu.DispBar(s, co.BarStyle, currView.Files[currView.File+1], currView.File+2, len(currView.Files))
+							c <- currView.DispBar(s, currView.Files[currView.File+1], currView.File+2)
 						}(c)
 
 						err := <-c
 
 						if err != nil {
-							panic(err)
+							fu.Errout(s, "unable to display the infobar")
 						}
 
-						if err := fu.DSelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-							panic(err)
+						if err := currView.DSelFile(s); err != nil {
+							fu.Errout(s, "unable to deselect file")
 						}
 
 						currView.Y += 1
 						currView.File += 1
 
-						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-							panic(err)
+						if err := currView.SelFile(s); err != nil {
+							fu.Errout(s, "unable to select file")
 						}
 
 						s.Show()
@@ -314,31 +319,31 @@ func main() {
 						currView.Buffer2 -= 1
 						currView.File -= 1
 
-						if err := fu.DrawScreen(s, currView); err != nil {
-							panic(err)
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 					} else {
 						c := make(chan error)
 
 						go func(c chan error) {
-							c <- fu.DispBar(s, co.BarStyle, currView.Files[currView.File-1], currView.File, len(currView.Files))
+							c <- currView.DispBar(s, currView.Files[currView.File-1], currView.File)
 						}(c)
 
 						err := <-c
 
 						if err != nil {
-							panic(err)
+							fu.Errout(s, "couldn't display infobar")
 						}
 
-						if err := fu.DSelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-							panic(err)
+						if err := currView.DSelFile(s); err != nil {
+							fu.Errout(s, "unable to deselect file")
 						}
 
 						currView.Y -= 1
 						currView.File -= 1
 
-						if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-							panic(err)
+						if err := currView.SelFile(s); err != nil {
+							fu.Errout(s, "unable to select file")
 						}
 
 						s.Show()
@@ -368,20 +373,20 @@ func main() {
 
 							s.Clear()
 
-							if err := fu.DispFiles(s, currView.Files); err != nil {
-								panic(err)
+							if err := currView.DispFiles(s); err != nil {
+								fu.Errout(s, "unable to display files")
 							}
 
 							fu.BorderPipes(s)
 						}
 
 						if len(currView.Files) != 0 {
-							if err := fu.SelFile(s, co.XBuff, currView.Y, currView.Files[currView.File]); err != nil {
-								panic(err)
+							if err := currView.SelFile(s); err != nil {
+								fu.Errout(s, "unable to select file")
 							}
 
-							if err := fu.DispBar(s, co.BarStyle, currView.Files[currView.File], currView.File+1, len(currView.Files)); err != nil {
-								panic(err)
+							if err := currView.DispBar(s, currView.Files[currView.File], currView.File+1); err != nil {
+								fu.Errout(s, "couldn't display the infobar")
 							}
 						}
 						s.Show()
@@ -407,12 +412,12 @@ func main() {
 							s, err = tcell.NewScreen()
 
 							if err != nil {
-								panic(err)
+								fu.Errout(s, "couldn't initialize screen")
 							}
 
 							s.Init()
-							if err := fu.DrawScreen(s, currView); err != nil {
-								panic(err)
+							if err := currView.DrawScreen(s); err != nil {
+								fu.Errout(s, "couldn't draw screen")
 							}
 
 							fu.BorderPipes(s)
@@ -427,13 +432,13 @@ func main() {
 						currView.Cwd, err = os.Getwd()
 
 						if err != nil {
-							panic(err)
+							fu.Errout(s, "unable to get the working directory")
 						}
 
 						currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 						if err != nil {
-							panic(err)
+							fu.Errout(s, "unable to read files")
 						}
 
 						currView.Buffer1 = 0
@@ -441,8 +446,8 @@ func main() {
 						currView.File = 0
 						currView.Y = co.YBuffTop
 
-						if err := fu.DrawScreen(s, currView); err != nil {
-							panic(err)
+						if err := currView.DrawScreen(s); err != nil {
+							fu.Errout(s, "couldn't draw screen")
 						}
 
 					}
@@ -455,13 +460,13 @@ func main() {
 					currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 					if err != nil {
-						panic(err)
+						fu.Errout(s, "unable to read files")
 					}
 
 					currView.Y = co.YBuffTop
 
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
+					if err := currView.DrawScreen(s); err != nil {
+						fu.Errout(s, "couldn't draw screen")
 					}
 				} else if input.Rune() >= 48 && input.Rune() <= 57 {
 					Views[fu.ViewNumber] = currView
@@ -492,7 +497,7 @@ func main() {
 					currView = Views[fu.ViewNumber]
 
 					if err := os.Chdir(currView.Cwd); err != nil {
-						panic(err)
+						fu.Errout(s, "couldn't change directory")
 					}
 
 					if currView.Width != width && currView.Height == height {
@@ -508,8 +513,8 @@ func main() {
 						}
 					}
 
-					if err := fu.DrawScreen(s, currView); err != nil {
-						panic(err)
+					if err := currView.DrawScreen(s); err != nil {
+						fu.Errout(s, "couldn't draw screen")
 					}
 				} else {
 					for k, v := range co.Bindings {
@@ -523,7 +528,7 @@ func main() {
 								u, err := user.Current()
 
 								if err != nil {
-									panic(err)
+									fu.Errout(s, "unable to get the current user")
 								}
 
 								err = os.Chdir(strings.Replace(v[1], "~", u.HomeDir, -1))
@@ -532,13 +537,13 @@ func main() {
 									currView.Cwd, err = os.Getwd()
 
 									if err != nil {
-										panic(err)
+										fu.Errout(s, "unable to get the working directory")
 									}
 
 									currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
 
 									if err != nil {
-										panic(err)
+										fu.Errout(s, "couldn't read files")
 									}
 
 									currView.Buffer1 = 0
@@ -546,8 +551,8 @@ func main() {
 									currView.File = 0
 									currView.Y = co.YBuffTop
 
-									if err := fu.DrawScreen(s, currView); err != nil {
-										panic(err)
+									if err := currView.DrawScreen(s); err != nil {
+										fu.Errout(s, "couldn't draw screen")
 									}
 								}
 							} else if v[0] == "t" {
@@ -564,13 +569,13 @@ func main() {
 								s, err = tcell.NewScreen()
 
 								if err != nil {
-									panic(err)
+									fu.Errout(s, "couldn't initialize screen")
 								}
 
 								s.Init()
 
-								if err := fu.DrawScreen(s, currView); err != nil {
-									panic(err)
+								if err := currView.DrawScreen(s); err != nil {
+									fu.Errout(s, "couldn't draw screen")
 								}
 							} else if v[0] == "g" {
 								cmd := exec.Command(co.Shell, "-c", replacedString)

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"sort"
 	"os"
+	"fmt"
 )
 
 var (
@@ -120,4 +121,11 @@ func Itemi(item string, slice []string) (out int) {
 	}
 
 	return
+}
+
+func Errout(s tcell.Screen, msg string) {
+	s.Fini()
+	fmt.Println("catfm: " + msg)
+
+	os.Exit(0)
 }

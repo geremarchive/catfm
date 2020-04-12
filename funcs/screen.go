@@ -18,8 +18,13 @@ func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	}
 }
 
-func DispFiles(s tcell.Screen, files []string) error {
+func (v View) DispFiles(s tcell.Screen) error {
 	_, height := s.Size()
+	files := v.Files
+
+	if v.Buffer1 > 0 {
+		files = v.Files[v.Buffer1:v.Buffer2]
+	}
 
 	if len(files) != 0 {
 		for i, f := range files {
@@ -47,79 +52,79 @@ func DispFiles(s tcell.Screen, files []string) error {
 			return err
 		}
 
-		Addstr(s, tcell.StyleDefault.Foreground(tcell.GetColor("#ff0000")).Bold(true), co.XBuff, co.YBuffTop, msg)
+		Addstr(s, tcell.StyleDefault, co.XBuff, co.YBuffTop, msg)
 	}
 
 	return nil
 }
 
-func SelFile(s tcell.Screen, x int, y int, file string) error {
-	formated, err := FormatText(s, file, true)
+func (v View) SelFile(s tcell.Screen) error {
+	formated, err := FormatText(s, v.Files[v.File], true)
 
 	if err != nil {
 		return err
 	}
 
-	splitFile := strings.Split(file, ".")
+	splitFile := strings.Split(v.Files[v.File], ".")
 	width, _ := s.Size()
 
 	if co.SelectType == "full" {
-		Addstr(s, co.SelectStyle, x, y, formated + strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
+		Addstr(s, co.SelectStyle, co.XBuff, v.Y, formated + strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
 	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-		Addstr(s, co.SelectArrowStyle, x, y, co.SelectArrow)
+		Addstr(s, co.SelectArrowStyle, co.XBuff, v.Y, co.SelectArrow)
 
 		if co.SelectType == "arrow-default" {
-			Addstr(s, co.SelectStyle, x+len(co.SelectArrow), y, formated)
+			Addstr(s, co.SelectStyle, co.XBuff+len(co.SelectArrow), v.Y, formated)
 		} else {
-			if Isd(file) {
-				Addstr(s, co.FileColors["[dir]"], x+len(co.SelectArrow), y, formated)
+			if Isd(v.Files[v.File]) {
+				Addstr(s, co.FileColors["[dir]"], co.XBuff+len(co.SelectArrow), v.Y, formated)
 			} else {
-				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x+len(co.SelectArrow), y, formated)
+				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff+len(co.SelectArrow), v.Y, formated)
 			}
 		}
 	} else if co.SelectType == "default" {
-		Addstr(s, co.SelectStyle, x, y, formated)
+		Addstr(s, co.SelectStyle, co.XBuff, v.Y, formated)
 	}
 
 	return nil
 }
 
-func DSelFile(s tcell.Screen, x int, y int, file string) error {
-	formated, err := FormatText(s, file, false)
+func (v View) DSelFile(s tcell.Screen) error {
+	formated, err := FormatText(s, v.Files[v.File], false)
 
 	if err != nil {
 		return err
 	}
 
-	splitFile := strings.Split(file, ".")
+	splitFile := strings.Split(v.Files[v.File], ".")
 	width, _ := s.Size()
 
 	if co.SelectType == "full" {
-		if Isd(file) {
-			Addstr(s, co.FileColors["[dir]"], x, y, formated)
+		if Isd(v.Files[v.File]) {
+			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated)
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated)
 		}
 
-		Addstr(s, tcell.StyleDefault, x+len(formated), y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
+		Addstr(s, tcell.StyleDefault, co.XBuff+len(formated), v.Y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
 	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-		if Isd(file) {
-			Addstr(s, co.FileColors["[dir]"], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)))
+		if Isd(v.Files[v.File]) {
+			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)))
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
 		}
 	} else if co.SelectType == "default" {
-		if Isd(file) {
-			Addstr(s, co.FileColors["[dir]"], x, y, formated)
+		if Isd(v.Files[v.File]) {
+			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated)
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], x, y, formated)
+			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated)
 		}
 	}
 
 	return nil
 }
 
-func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr int, total int) error {
+func (v View) DispBar(s tcell.Screen, file string, curr int) error {
 	var x int = co.XBuff
 	var elemOutput string
 	var loc int
@@ -136,10 +141,10 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 
 	Addstr(s, tcell.StyleDefault, co.XBuff, loc, strings.Repeat(" ", barLen))
 
-	keys := make([]string, len(elements))
+	keys := make([]string, len(co.BarStyle))
 
 	i := 0
-	for k, _ := range elements {
+	for k, _ := range co.BarStyle {
 		keys[i] = k
 		i++
 	}
@@ -187,10 +192,10 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 
 			elemOutput = f.Mode().String()
 		} else if k[1:] == "total" {
-			elemOutput = strconv.Itoa(curr) + "/" + strconv.Itoa(total)
+			elemOutput = strconv.Itoa(curr) + "/" + strconv.Itoa(len(v.Files))
 		} else if k[1] == '[' && k[len(k)-1] == ']' {
 			replacedString := strings.Replace(k, "@", file, -1)
-			cmdOutput, _ := exec.Command("dash", "-c", replacedString[2:len(replacedString)-1]).Output()
+			cmdOutput, _ := exec.Command(co.Shell, "-c", replacedString[2:len(replacedString)-1]).Output()
 			elemOutput = string(cmdOutput)
 		} else if k[1:] == "tab" {
 			elemOutput = "[" + strconv.Itoa(ViewNumber+1) + "]"
@@ -220,7 +225,7 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 			elemOutput = strings.Replace(elemOutput, "$TAB", strconv.Itoa(ViewNumber+1), -1)
 		}
 
-		Addstr(s, elements[k], x, loc, elemOutput)
+		Addstr(s, co.BarStyle[k], x, loc, elemOutput)
 		if num, _ := strconv.Atoi(string(k[0])); num != len(keys) {
 			Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), loc, co.BarDiv)
 			x += len(elemOutput + co.BarDiv)
@@ -236,18 +241,14 @@ func DispBar(s tcell.Screen, elements map[string]tcell.Style, file string, curr 
 	return nil
 }
 
-func DrawScreen(s tcell.Screen, v View) error {
+func (v View) DrawScreen(s tcell.Screen) error {
 	s.Clear()
 
 	c := make(chan error)
 	var err error
 
 	go func(c chan error) {
-		if v.Buffer1 == 0 {
-			err = DispFiles(s, v.Files)
-		} else {
-			err = DispFiles(s, v.Files[v.Buffer1:v.Buffer2+1])
-		}
+		err = v.DispFiles(s)
 
 		c <- err
 	}(c)
@@ -261,13 +262,13 @@ func DrawScreen(s tcell.Screen, v View) error {
 	go BorderPipes(s)
 
 	if len(v.Files) > 0 {
-		err := DispBar(s, co.BarStyle, v.Files[v.File], v.File+1, len(v.Files))
+		err := v.DispBar(s, v.Files[v.File], v.File+1)
 
 		if err != nil {
 			return err
 		}
 
-		err = SelFile(s, co.XBuff, v.Y, v.Files[v.File])
+		err = v.SelFile(s)
 
 		if err != nil {
 			return err
@@ -356,8 +357,8 @@ func (v *View) GoToLast(s tcell.Screen) {
 		v.Y = v.File + co.YBuffTop
 	}
 
-	if err := DrawScreen(s, *v); err != nil {
-		panic(err)
+	if err := v.DrawScreen(s); err != nil {
+		Errout(s, "couldn't draw screen")
 	}
 }
 
@@ -370,7 +371,7 @@ func (v *View) GoToFirst(s tcell.Screen) {
 	v.Buffer1 = 0
 	v.Buffer2 = height - co.YBuffTop
 
-	if err := DrawScreen(s, *v); err != nil {
-		panic(err)
+	if err := v.DrawScreen(s); err != nil {
+		Errout(s, "couldn't draww screen")
 	}
 }
