@@ -22,10 +22,9 @@ package main
 import (
 	"github.com/gdamore/tcell"
 	"os"
-	"os/exec"
-	"os/user"
 	"strings"
 	"fmt"
+	"io/ioutil"
 	fu "catfm/funcs"
 	co "catfm/config"
 	ke "catfm/keys"
@@ -273,6 +272,38 @@ func main() {
 					currView.GoToFirst(s)
 				} else if ke.MatchKey(input, co.KeyGoToLast) && currView.File < len(currView.Files)-1 {
 					currView.GoToLast(s)
+				} else if ke.MatchKey(input, co.KeyRename) {
+					err := ioutil.WriteFile("/tmp/rename.catfm", []byte(currView.Files[currView.File]), 0644)
+
+					if err == nil {
+						replaced := strings.Replace(co.FileOpen["*"][1], "@", "/tmp/rename.catfm", -1)
+
+						s = currView.ParseBinding(s, []string{co.FileOpen["*"][0],  replaced})
+
+						if _, err := os.Stat("/tmp/rename.catfm"); err == nil {
+							file, err := os.Open("/tmp/rename.catfm")
+
+							defer file.Close()
+
+							if err == nil {
+								b, err := ioutil.ReadAll(file)
+
+								if err == nil {
+									newName := strings.Split(string(b), "\n")[0]
+									_, in := fu.In(newName, currView.Files)
+
+									if newName != "" && !(in) {
+										os.Rename(currView.Files[currView.File], newName)
+										currView.Files[currView.File] = newName
+
+										if err := currView.DrawScreen(s); err != nil {
+											fu.Errout(s, "couldn't draw screen")
+										}
+									}
+								}
+							}
+						}
+					}
 				} else if (input.Key() == tcell.KeyDown || ke.MatchKey(input, co.KeyDown)) && len(currView.Files) != 0 {
 					if currView.File == len(currView.Files)-1 {
 						currView.GoToFirst(s)
@@ -406,30 +437,7 @@ func main() {
 							}
 						}
 
-						replacedString := strings.Replace(command[1], "@", currView.Files[currView.File], -1)
-						cmd := exec.Command(co.Shell, "-c", replacedString)
-
-						if command[0] == "t" {
-							cmd.Stdout = os.Stdout
-							cmd.Stdin = os.Stdin
-
-							s.Fini()
-							cmd.Run()
-							s, err = tcell.NewScreen()
-
-							if err != nil {
-								fu.Errout(s, "couldn't initialize screen")
-							}
-
-							s.Init()
-							if err := currView.DrawScreen(s); err != nil {
-								fu.Errout(s, "couldn't draw screen")
-							}
-
-							fu.BorderPipes(s)
-						} else if command[0] == "g" {
-							cmd.Start()
-						}
+						s = currView.ParseBinding(s, command)
 					}
 				} else if input.Key() == tcell.KeyLeft || ke.MatchKey(input, co.KeyLeft) {
 					err := os.Chdir("..")
@@ -525,68 +533,8 @@ func main() {
 				} else {
 					for k, v := range co.Bindings {
 						if ke.MatchKey(input, k) {
-							replacedString := v[1]
-							if len(currView.Files) != 0 {
-								replacedString = strings.Replace(v[1], "@", currView.Files[currView.File], -1)
-							}
-
-							if v[0] == "cd" {
-								u, err := user.Current()
-
-								if err != nil {
-									fu.Errout(s, "unable to get the current user")
-								}
-
-								err = os.Chdir(strings.Replace(v[1], "~", u.HomeDir, -1))
-
-								if err == nil {
-									currView.Cwd, err = os.Getwd()
-
-									if err != nil {
-										fu.Errout(s, "unable to get the working directory")
-									}
-
-									currView.Files, err = fu.GetFiles(currView.Cwd, currView.Dot)
-
-									if err != nil {
-										fu.Errout(s, "couldn't read files")
-									}
-
-									currView.Buffer1 = 0
-									currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
-									currView.File = 0
-									currView.Y = co.YBuffTop
-
-									if err := currView.DrawScreen(s); err != nil {
-										fu.Errout(s, "couldn't draw screen")
-									}
-								}
-							} else if v[0] == "t" {
-								cmd := exec.Command(co.Shell, "-c", replacedString)
-
-								s.Fini()
-
-								cmd.Stdout = os.Stdout
-								cmd.Stdin = os.Stdin
-								cmd.Run()
-
-								fmt.Print()
-
-								s, err = tcell.NewScreen()
-
-								if err != nil {
-									fu.Errout(s, "couldn't initialize screen")
-								}
-
-								s.Init()
-
-								if err := currView.DrawScreen(s); err != nil {
-									fu.Errout(s, "couldn't draw screen")
-								}
-							} else if v[0] == "g" {
-								cmd := exec.Command(co.Shell, "-c", replacedString)
-								cmd.Start()
-							}
+							s = currView.ParseBinding(s, v)
+							break
 						}
 					}
 				}

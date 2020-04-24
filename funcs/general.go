@@ -4,6 +4,9 @@ import (
 	co "catfm/config"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
+	"strings"
+	"os/user"
+	"os/exec"
 	"sort"
 	"os"
 	"fmt"
@@ -128,4 +131,73 @@ func Errout(s tcell.Screen, msg string) {
 	fmt.Println("catfm: " + msg)
 
 	os.Exit(0)
+}
+
+func (v *View) ParseBinding(s tcell.Screen, val []string) tcell.Screen {
+	replacedString := val[1]
+
+	if len(v.Files) != 0 {
+		replacedString = strings.Replace(val[1], "@", v.Files[v.File], -1)
+	}
+
+	if val[0] == "cd" {
+		u, err := user.Current()
+
+		if err != nil {
+			Errout(s, "unable to get the current user")
+		}
+
+		err = os.Chdir(strings.Replace(val[1], "~", u.HomeDir, -1))
+
+		if err == nil {
+			v.Cwd, err = os.Getwd()
+
+			if err != nil {
+				Errout(s, "unable to get the working directory")
+			}
+
+			v.Files, err = GetFiles(v.Cwd, v.Dot)
+
+			if err != nil {
+				Errout(s, "couldn't read files")
+			}
+
+			_, height := s.Size()
+
+			v.Buffer1 = 0
+			v.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
+			v.File = 0
+			v.Y = co.YBuffTop
+
+			if err := v.DrawScreen(s); err != nil {
+				Errout(s, "couldn't draw screen")
+			}
+		}
+	} else if val[0] == "t" {
+		cmd := exec.Command(co.Shell, "-c", replacedString)
+
+		s.Fini()
+
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Run()
+
+		var err error
+		s, err = tcell.NewScreen()
+
+		if err != nil {
+			Errout(s, "couldn't initialize screen")
+		}
+
+		s.Init()
+
+		if err := v.DrawScreen(s); err != nil {
+			Errout(s, "couldn't draw screen")
+		}
+	} else if val[0] == "g" {
+		cmd := exec.Command(co.Shell, "-c", replacedString)
+		cmd.Start()
+	}
+
+	return s
 }

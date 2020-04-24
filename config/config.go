@@ -23,6 +23,7 @@ var (
 	KeyRefresh string = "f"
 	KeyQuit string = "q"
 	KeyDelete string = "d"
+	KeyRename string = "e"
 	KeyRecycle string = "r" // move a file to the recycle bin.
 	KeyBulkDelete string = "D"
 	KeyCopy string = "C"
@@ -67,7 +68,7 @@ var (
 
 	Shell string = "sh" // Shell that will be used to execute commands
 	TildeHome bool = true // replace /home/user with "~"
-	RecycleBin string = "/home/gmk/.cache/catfm" // the directory where "deleted" files go.
+	RecycleBin string = "" // the directory where "deleted" files go.
 			     // (I suggest ~/.cache/catfm)
 
 	FileOpen = map[string][]string {
