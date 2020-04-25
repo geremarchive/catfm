@@ -72,8 +72,8 @@ fm() {
 - [X] Run custom commands in the bar
 - [X] Add hotkeys for directories
 - [ ] Add file searching
-- [ ] Add file renaming
+- [X] Add file renaming
 - [X] Add ability to customize the keys for delete, move, copy, movement, etc.
 - [X] Move to top or bottom screen
 - [X] Add tabs
-- [ ] Improve config file and keybinds
+- [X] Improve config file and keybinds
