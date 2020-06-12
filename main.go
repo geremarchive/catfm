@@ -305,86 +305,9 @@ func main() {
 						}
 					}
 				} else if (input.Key() == tcell.KeyDown || ke.MatchKey(input, co.KeyDown)) && len(currView.Files) != 0 {
-					if currView.File == len(currView.Files)-1 {
-						currView.GoToFirst(s)
-					} else if currView.Y == (height-1)-co.YBuffBottom {
-						currView.Buffer1 += 1
-
-						if currView.Buffer2 >= len(currView.Files)-1 {
-							currView.Buffer2 = len(currView.Files)-1
-						} else {
-							currView.Buffer2 += 1
-						}
-
-						currView.File += 1
-
-						if err := currView.DrawScreen(s); err != nil {
-							fu.Errout(s, "couldn't draw screen")
-						}
-					} else {
-						c := make(chan error)
-
-						go func(c chan error) {
-							c <- currView.DispBar(s, currView.Files[currView.File+1], currView.File+2)
-						}(c)
-
-						err := <-c
-
-						if err != nil {
-							fu.Errout(s, "unable to display the infobar")
-						}
-
-						if err := currView.DSelFile(s); err != nil {
-							fu.Errout(s, "unable to deselect file")
-						}
-
-						currView.Y += 1
-						currView.File += 1
-
-						if err := currView.SelFile(s); err != nil {
-							fu.Errout(s, "unable to select file")
-						}
-
-						s.Show()
-					}
-
+					currView.Move(s, 1)
 				} else if (input.Key() == tcell.KeyUp || ke.MatchKey(input, co.KeyUp)) && len(currView.Files) != 0 {
-					if currView.File == 0 {
-						currView.GoToLast(s)
-					} else if currView.Y == co.YBuffTop {
-						currView.Buffer1 -= 1
-						currView.Buffer2 -= 1
-						currView.File -= 1
-
-						if err := currView.DrawScreen(s); err != nil {
-							fu.Errout(s, "couldn't draw screen")
-						}
-					} else {
-						c := make(chan error)
-
-						go func(c chan error) {
-							c <- currView.DispBar(s, currView.Files[currView.File-1], currView.File)
-						}(c)
-
-						err := <-c
-
-						if err != nil {
-							fu.Errout(s, "couldn't display infobar")
-						}
-
-						if err := currView.DSelFile(s); err != nil {
-							fu.Errout(s, "unable to deselect file")
-						}
-
-						currView.Y -= 1
-						currView.File -= 1
-
-						if err := currView.SelFile(s); err != nil {
-							fu.Errout(s, "unable to select file")
-						}
-
-						s.Show()
-					}
+					currView.Move(s, -1)
 				} else if (input.Key() == tcell.KeyRight || ke.MatchKey(input, co.KeyRight)) && len(currView.Files) != 0 {
 					if fu.Isd(currView.Files[currView.File]) {
 						err := os.Chdir(currView.Files[currView.File])

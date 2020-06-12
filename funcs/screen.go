@@ -111,7 +111,7 @@ func (v View) DSelFile(s tcell.Screen) error {
 		if Isd(v.Files[v.File]) {
 			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)))
 		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
+				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
 		}
 	} else if co.SelectType == "default" {
 		if Isd(v.Files[v.File]) {
@@ -373,5 +373,58 @@ func (v *View) GoToFirst(s tcell.Screen) {
 
 	if err := v.DrawScreen(s); err != nil {
 		Errout(s, "couldn't draww screen")
+	}
+}
+
+func (v *View) Move(s tcell.Screen, n int) {
+	_, h := s.Size()
+
+	if v.File == 0 && n == -1 {
+		v.GoToLast(s)
+	} else if v.File == len(v.Files)-1 && n == 1 {
+		v.GoToFirst(s)
+	} else if (v.Y == (h-1)-co.YBuffBottom && n == 1) || (v.Y == co.YBuffTop && n == -1) {
+		v.Buffer1 += n
+		v.File += n
+
+		if n == 1 {
+			v.Buffer2 += n
+		}
+
+		if err := v.DrawScreen(s); err != nil {
+			Errout(s, "couldn't draw screen")
+		}
+	} else {
+		c := make(chan error)
+
+		go func(c chan error) {
+			cf := 0
+
+			if n == 1 {
+				cf = 2
+			}
+
+			c <- v.DispBar(s, v.Files[v.File+n], v.File+cf)
+		}(c)
+
+		err := <-c
+
+		if err != nil {
+			Errout(s, "unable to display the infobar")
+		}
+
+		if err := v.DSelFile(s); err != nil {
+			Errout(s, "unable to deselect file")
+		}
+
+		v.Y += n
+		v.File += n
+
+		if err := v.SelFile(s); err != nil {
+			Errout(s, "unable to select file")
+		}
+
+		s.Show()
+
 	}
 }
