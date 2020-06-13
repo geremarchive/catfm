@@ -385,10 +385,11 @@ func (v *View) Move(s tcell.Screen, n int) {
 		v.GoToFirst(s)
 	} else if (v.Y == (h-1)-co.YBuffBottom && n == 1) || (v.Y == co.YBuffTop && n == -1) {
 		v.Buffer1 += n
+		v.Buffer2 += n
 		v.File += n
 
-		if n == 1 {
-			v.Buffer2 += n
+		if n == -1 {
+			v.Buffer2 += 1
 		}
 
 		if err := v.DrawScreen(s); err != nil {
