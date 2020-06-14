@@ -352,7 +352,7 @@ func (v *View) GoToLast(s tcell.Screen) {
 		v.Y = height - (co.YBuffBottom + 1)
 
 		v.Buffer1 = (len(v.Files))-(height-(co.YBuffTop+co.YBuffBottom))
-		v.Buffer2 = len(v.Files) - 1
+		v.Buffer2 = len(v.Files)
 	} else {
 		v.Y = v.File + co.YBuffTop
 	}
@@ -369,7 +369,7 @@ func (v *View) GoToFirst(s tcell.Screen) {
 	v.Y = co.YBuffTop
 
 	v.Buffer1 = 0
-	v.Buffer2 = height - co.YBuffTop
+	v.Buffer2 = height-co.YBuffBottom
 
 	if err := v.DrawScreen(s); err != nil {
 		Errout(s, "couldn't draww screen")
@@ -387,10 +387,6 @@ func (v *View) Move(s tcell.Screen, n int) {
 		v.Buffer1 += n
 		v.Buffer2 += n
 		v.File += n
-
-		if n == -1 {
-			v.Buffer2 += 1
-		}
 
 		if err := v.DrawScreen(s); err != nil {
 			Errout(s, "couldn't draw screen")
