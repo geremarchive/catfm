@@ -1,14 +1,12 @@
 <h1 align="center">catfm 🐟</h1>
 
-<p align="center"><img src="media/logo.png"></p>
+<p align="center"><img src="media/catfm-by-gmk.png"></p>
 
 <p align="center">a simple and programmable file manager written in Go</p>
 
 ## About
 
 catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emulate the pluto file manager that I started working on in late 2018. Pluto was slow and buggy so I decided that I needed to rewrite it from scratch in a new language. So voilà, you have catfm!
-
-<p align="center"><img src="media/demo.png"></p>
 
 ## Features
 
@@ -74,7 +72,7 @@ fm() {
 - [X] Run program/script/command on keypress
 - [X] Run custom commands in the bar
 - [X] Add hotkeys for directories
-- [ ] Add file searching
+- [X] Add file searching
 - [X] Add file renaming
 - [X] Add ability to customize the keys for delete, move, copy, movement, etc.
 - [X] Move to top or bottom screen
