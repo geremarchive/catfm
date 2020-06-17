@@ -10,6 +10,7 @@ import (
 	"os/user"
 	"code.cloudfoundry.org/bytefmt"
 	co "catfm/config"
+	ke "catfm/keys"
 )
 
 func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
@@ -423,5 +424,83 @@ func (v *View) Move(s tcell.Screen, n int) {
 
 		s.Show()
 
+	}
+}
+
+func (v *View) Resize(s tcell.Screen) {
+	nw, nh := s.Size()
+
+	if v.Width != nw && v.Height == nh {
+		v.Width, v.Height = nw, nh
+	} else if v.Height != nh {
+		v.Width, v.Height = nw, nh
+
+		if v.Buffer1 != 0 || v.File > v.Height-(co.YBuffTop+co.YBuffBottom) {
+			v.Buffer1 = 0
+			v.Buffer2 = (v.Height-co.YBuffBottom)+co.YBuffTop
+			v.Y = co.YBuffTop
+			v.File = 0
+		}
+	}
+
+	if err := v.DrawScreen(s); err != nil {
+		Errout(s, "unable to draw screen")
+	}
+
+	BorderPipes(s)
+}
+
+func (v *View) Search(s tcell.Screen) {
+	var (
+		original []string = v.Files
+		searching bool = true
+		search string
+	)
+
+	for searching {
+		v.Resize(s)
+
+		input := s.PollEvent()
+
+		switch input := input.(type) {
+			case *tcell.EventKey:
+				if ke.MatchKey(input, co.KeyToggleSearch) {
+					searching = false
+				} else if input.Key() == tcell.KeyDEL || input.Key() == tcell.KeyBS {
+					if len(search) > 0 {
+						if len(search) == 1 {
+							search = ""
+						} else {
+							search = search[:len(search)-1]
+						}
+					}
+				} else {
+					search += string(input.Rune())
+				}
+
+				v.Files = []string{}
+
+				for _, e := range original {
+					if strings.Contains(e, search) {
+						v.Files = append(v.Files, e)
+					}
+				}
+
+				if v.File != 0 {
+					v.File = 0
+					v.Y = co.YBuffTop
+
+					v.Buffer1 = 0
+					v.Buffer2 = v.Height-co.YBuffBottom
+				}
+
+				if err := v.DrawScreen(s); err != nil {
+					Errout(s, "unable to draw screen")
+				}
+
+				BorderPipes(s)
+
+
+		}
 	}
 }

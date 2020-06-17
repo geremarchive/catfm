@@ -16,6 +16,14 @@ var (
 	barLen int
 )
 
+func Space(s string, x int) (out string) {
+	for i := 0; i < x; i++ {
+		out += s
+	}
+
+	return
+}
+
 func In(item string, array []string) (int, bool) {
 	for i, elem := range array {
 		if elem == item {
@@ -43,8 +51,10 @@ func GetFiles(path string, dot bool) ([]string, error) {
 			f = append(f, string(elem.Name()))
 		}
 	}
+
 	sort.Strings(d)
 	sort.Strings(f)
+
 	return append(d, f...), nil
 }
 
@@ -68,8 +78,10 @@ func FormatText(s tcell.Screen, text string, sel bool) (string, error) {
 		return "", err
 	}
 
-	var tlen int
-	var buflen int
+	var (
+		tlen int
+		buflen int
+	)
 
 	if sel && (co.SelectType == "arrow" || co.SelectType == "arrow-default") {
 		tlen = len(text)+len(co.SelectArrow)

@@ -103,33 +103,8 @@ func main() {
 	s.Show()
 
 	for {
-		nw, nh := s.Size()
-		if width != nw && height == nh {
-			width, height = nw, nh
-			currView.Width, currView.Height = nw, nh
+		currView.Resize(s)
 
-			if err := currView.DrawScreen(s); err != nil {
-				fu.Errout(s, "unable to draw screen")
-			}
-
-			fu.BorderPipes(s)
-		} else if height != nh {
-			width, height = nw, nh
-			currView.Width, currView.Height = nw, nh
-
-			if currView.Buffer1 != 0 || currView.File > currView.Height-(co.YBuffTop+co.YBuffBottom) {
-				currView.Buffer1 = 0
-				currView.Buffer2 = (height-co.YBuffBottom)+co.YBuffTop
-				currView.Y = co.YBuffTop
-				currView.File = 0
-			}
-
-			if err := currView.DrawScreen(s); err != nil {
-				fu.Errout(s, "unable to draw screen")
-			}
-
-			fu.BorderPipes(s)
-		}
 		input := s.PollEvent()
 
 		switch input := input.(type) {
@@ -388,7 +363,7 @@ func main() {
 						}
 
 					}
-				} else if ke.MatchKey(input, co.KeyRefresh) && len(currView.Files) != 0 {
+				} else if ke.MatchKey(input, co.KeyRefresh) {
 					currView.File = 0
 
 					currView.Buffer1 = 0
@@ -405,6 +380,8 @@ func main() {
 					if err := currView.DrawScreen(s); err != nil {
 						fu.Errout(s, "couldn't draw screen")
 					}
+				} else if ke.MatchKey(input, co.KeyToggleSearch) {
+					currView.Search(s)
 				} else if input.Rune() >= 48 && input.Rune() <= 57 {
 					Views[fu.ViewNumber] = currView
 
@@ -437,22 +414,7 @@ func main() {
 						fu.Errout(s, "couldn't change directory")
 					}
 
-					if currView.Width != width && currView.Height == height {
-						currView.Width = width
-					} else if currView.Height != height {
-						currView.Width, currView.Height = width, height
-
-						if currView.Buffer1 != 0 || currView.File > currView.Height-(co.YBuffTop+co.YBuffBottom) {
-							currView.Buffer1 = 0
-							currView.Buffer2 = height-co.YBuffBottom
-							currView.File = 0
-							currView.Y = co.YBuffTop
-						}
-					}
-
-					if err := currView.DrawScreen(s); err != nil {
-						fu.Errout(s, "couldn't draw screen")
-					}
+					currView.Resize(s)
 				} else {
 					for k, v := range co.Bindings {
 						if ke.MatchKey(input, k) {

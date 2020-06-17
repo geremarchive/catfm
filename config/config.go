@@ -26,6 +26,7 @@ var (
 	KeyRename string = "e"
 	KeyRecycle string = "r" // move a file to the recycle bin.
 	KeyBulkDelete string = "D"
+	KeyToggleSearch string = "ctrl-s" // turn search mode on and off
 	KeyCopy string = "C"
 	KeyMove string = "M"
 	KeySelect string = " "
@@ -43,7 +44,7 @@ var (
 	BarBg tcell.Color = tcell.GetColor("#0000ff")
 	BarFg tcell.Color = tcell.GetColor("#000000")
 	BarDiv string = " "
-	BarStyle = map[string]tcell.Style{
+	BarStyle = map[string]tcell.Style {
 		// Make sure to order your elements!
 		// To get the output of a command/script encolse the script in brackets
 		// To access the currently selected file use the "@" symbol, i.e. 1[ls -l @]
