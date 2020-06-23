@@ -2,11 +2,11 @@
 
 <p align="center"><img src="media/catfm-by-gmk.png"></p>
 
-<p align="center">a simple and programmable file manager written in Go</p>
+<p align="center">An extensible interactive shell for the UNIX operating system</p>
 
 ## About
 
-catfm, or **C**ool **A**nd **T**echnical **F**ile **M**anager was written to emulate the pluto file manager that I started working on in late 2018. Pluto was slow and buggy so I decided that I needed to rewrite it from scratch in a new language. So voilà, you have catfm!
+```catfm```, or **C**ompact **A**nd **T**weakable **F**ile **M**anager is an interactive shell for your UNIX system that runs right in your terminal. It not only allows the user to manage files, but to complete complex actions through simple user defined keyboard shortcuts
 
 ## Features
 
@@ -66,6 +66,10 @@ fm() {
 	catfm && cd "$(< /tmp/kitty)"
 }
 ```
+
+## Tutorial
+
+Coming soon...
 
 ## Todo
 
