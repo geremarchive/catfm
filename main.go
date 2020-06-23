@@ -28,15 +28,22 @@ import (
 	fu "catfm/funcs"
 	co "catfm/config"
 	ke "catfm/keys"
+	he "catfm/help"
 	cp "github.com/otiai10/copy"
 )
 
 func main() {
 	if len(os.Args) > 1 {
-		err := os.Chdir(os.Args[1])
+		if os.Args[1] == "-h" || os.Args[1] == "--help" {
+			he.Help()
 
-		if err != nil {
-			fmt.Println("Couldn't open '" + os.Args[1] + "'")
+			return
+		} else {
+			err := os.Chdir(os.Args[1])
+
+			if err != nil {
+				fmt.Println("Couldn't open '" + os.Args[1] + "'")
+			}
 		}
 	}
 
