@@ -189,10 +189,12 @@ func main() {
 							fu.Errout(s, "unable to read files")
 						}
 
-						currView.Y = co.YBuffTop
-						currView.File = 0
+						if ke.MatchKey(input, co.KeyBulkDelete) {
+							currView.Y = co.YBuffTop
+							currView.File = 0
 
-						currView.Buffer1, currView.Buffer2 = 0, height - co.YBuffBottom
+							currView.Buffer1, currView.Buffer2 = 0, height - co.YBuffBottom
+						}
 
 						if err := currView.DrawScreen(s); err != nil {
 							fu.Errout(s, "couldn't draw screen")
