@@ -118,13 +118,13 @@ func main() {
 			case *tcell.EventKey:
 				if ke.MatchKey(input, co.KeyQuit) {
 					s.Fini()
+
 					file, err := os.Create("/tmp/kitty")
 
 					defer file.Close()
 
 					if err != nil {
 						fmt.Println("catfm: couldn't create /tmp/kitty")
-						os.Exit(0)
 					} else {
 
 						_, err := file.WriteString(currView.Cwd)

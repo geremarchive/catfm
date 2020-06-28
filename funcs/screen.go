@@ -19,6 +19,24 @@ func Addstr(s tcell.Screen, style tcell.Style, x int, y int, text string) {
 	}
 }
 
+func ShowFile(s tcell.Screen, x int, y int, f string, sel bool) (string, error) {
+	formated, err := FormatText(s, f, sel)
+
+	if err != nil {
+		return "", err
+	}
+
+	split := strings.Split(f, ".")
+
+	if Isd(f) {
+		Addstr(s, co.FileColors["[dir]"], x, y+co.YBuffTop, formated)
+	} else {
+		Addstr(s, co.FileColors[split[len(split)-1]], x, y+co.YBuffTop, formated)
+	}
+
+	return formated, nil
+}
+
 func (v View) DispFiles(s tcell.Screen) error {
 	_, height := s.Size()
 	files := v.Files
@@ -29,18 +47,9 @@ func (v View) DispFiles(s tcell.Screen) error {
 
 	if len(files) != 0 {
 		for i, f := range files {
-			formated, err := FormatText(s, f, false)
-
-			if err != nil {
-				return err
-			}
-
 			if i+co.YBuffTop < (height - co.YBuffBottom) {
-				splitFile := strings.Split(f, ".")
-				if Isd(f) {
-					Addstr(s, co.FileColors["[dir]"], co.XBuff, i+co.YBuffTop, formated)
-				} else {
-					Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, i+co.YBuffTop, formated)
+				if _, err := ShowFile(s, co.XBuff, i, f, false); err != nil {
+					return err
 				}
 			} else {
 				break
@@ -66,7 +75,6 @@ func (v View) SelFile(s tcell.Screen) error {
 		return err
 	}
 
-	splitFile := strings.Split(v.Files[v.File], ".")
 	width, _ := s.Size()
 
 	if co.SelectType == "full" {
@@ -77,10 +85,8 @@ func (v View) SelFile(s tcell.Screen) error {
 		if co.SelectType == "arrow-default" {
 			Addstr(s, co.SelectStyle, co.XBuff+len(co.SelectArrow), v.Y, formated)
 		} else {
-			if Isd(v.Files[v.File]) {
-				Addstr(s, co.FileColors["[dir]"], co.XBuff+len(co.SelectArrow), v.Y, formated)
-			} else {
-				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff+len(co.SelectArrow), v.Y, formated)
+			if _, err = ShowFile(s, co.XBuff+len(co.SelectArrow), v.Y, v.Files[v.File], false); err != nil {
+				return err
 			}
 		}
 	} else if co.SelectType == "default" {
@@ -91,35 +97,18 @@ func (v View) SelFile(s tcell.Screen) error {
 }
 
 func (v View) DSelFile(s tcell.Screen) error {
-	formated, err := FormatText(s, v.Files[v.File], false)
+	width, _ := s.Size()
+
+	formated, err := ShowFile(s, co.XBuff, v.Y, v.Files[v.File], false)
 
 	if err != nil {
 		return err
 	}
 
-	splitFile := strings.Split(v.Files[v.File], ".")
-	width, _ := s.Size()
-
 	if co.SelectType == "full" {
-		if Isd(v.Files[v.File]) {
-			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated)
-		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated)
-		}
-
 		Addstr(s, tcell.StyleDefault, co.XBuff+len(formated), v.Y, strings.Repeat(" ", width-(len(formated)+(co.XBuff*2))))
 	} else if co.SelectType == "arrow" || co.SelectType == "arrow-default" {
-		if Isd(v.Files[v.File]) {
-			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)))
-		} else {
-				Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated + strings.Repeat(" ", len(co.SelectArrow)+1))
-		}
-	} else if co.SelectType == "default" {
-		if Isd(v.Files[v.File]) {
-			Addstr(s, co.FileColors["[dir]"], co.XBuff, v.Y, formated)
-		} else {
-			Addstr(s, co.FileColors[splitFile[len(splitFile)-1]], co.XBuff, v.Y, formated)
-		}
+		Addstr(s, tcell.StyleDefault, co.XBuff+len(formated), v.Y, strings.Repeat(" ", len(co.SelectArrow)+1))
 	}
 
 	return nil
