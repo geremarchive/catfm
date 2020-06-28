@@ -29,9 +29,9 @@ func ShowFile(s tcell.Screen, x int, y int, f string, sel bool) (string, error) 
 	split := strings.Split(f, ".")
 
 	if Isd(f) {
-		Addstr(s, co.FileColors["[dir]"], x, y+co.YBuffTop, formated)
+		Addstr(s, co.FileColors["[dir]"], x, y, formated)
 	} else {
-		Addstr(s, co.FileColors[split[len(split)-1]], x, y+co.YBuffTop, formated)
+		Addstr(s, co.FileColors[split[len(split)-1]], x, y, formated)
 	}
 
 	return formated, nil
@@ -48,7 +48,7 @@ func (v View) DispFiles(s tcell.Screen) error {
 	if len(files) != 0 {
 		for i, f := range files {
 			if i+co.YBuffTop < (height - co.YBuffBottom) {
-				if _, err := ShowFile(s, co.XBuff, i, f, false); err != nil {
+				if _, err := ShowFile(s, co.XBuff, i+co.YBuffTop, f, false); err != nil {
 					return err
 				}
 			} else {
