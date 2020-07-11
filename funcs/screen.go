@@ -234,33 +234,18 @@ func (v View) DispBar(s tcell.Screen, file string, curr int) error {
 func (v View) DrawScreen(s tcell.Screen) error {
 	s.Clear()
 
-	c := make(chan error)
-	var err error
-
-	go func(c chan error) {
-		err = v.DispFiles(s)
-
-		c <- err
-	}(c)
-
-	err = <-c
-
-	if err != nil {
+	if err := v.DispFiles(s); err != nil {
 		return err
 	}
 
 	go BorderPipes(s)
 
 	if len(v.Files) > 0 {
-		err := v.DispBar(s, v.Files[v.File], v.File+1)
-
-		if err != nil {
+		if err := v.DispBar(s, v.Files[v.File], v.File+1); err != nil {
 			return err
 		}
 
-		err = v.SelFile(s)
-
-		if err != nil {
+		if err := v.SelFile(s); err != nil {
 			return err
 		}
 	}
