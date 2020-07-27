@@ -394,27 +394,10 @@ func main() {
 				} else if input.Rune() >= 48 && input.Rune() <= 57 {
 					Views[fu.ViewNumber] = currView
 
-					switch input.Rune() {
-					case '1':
-						fu.ViewNumber = 0
-					case '2':
-						fu.ViewNumber = 1
-					case '3':
-						fu.ViewNumber = 2
-					case '4':
-						fu.ViewNumber = 3
-					case '5':
-						fu.ViewNumber = 4
-					case '6':
-						fu.ViewNumber = 5
-					case '7':
-						fu.ViewNumber = 6
-					case '8':
-						fu.ViewNumber = 7
-					case '9':
-						fu.ViewNumber = 8
-					case '0':
+					if input.Rune() == '0' {
 						fu.ViewNumber = 9
+					} else {
+						fu.ViewNumber = int(input.Rune()-49)
 					}
 
 					currView = Views[fu.ViewNumber]

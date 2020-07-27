@@ -406,11 +406,6 @@ func (v *View) Resize(s tcell.Screen) {
 
 	if v.Width != nw && v.Height == nh {
 		v.Width, v.Height = nw, nh
-
-		if err := v.DrawScreen(s); err != nil {
-			Errout(s, "unable to draw screen")
-		}
-
 	} else if v.Height != nh {
 		v.Width, v.Height = nw, nh
 
@@ -420,11 +415,10 @@ func (v *View) Resize(s tcell.Screen) {
 			v.Y = co.YBuffTop
 			v.File = 0
 		}
+	}
 
-		if err := v.DrawScreen(s); err != nil {
-			Errout(s, "unable to draw screen")
-		}
-
+	if err := v.DrawScreen(s); err != nil {
+		Errout(s, "unable to draw screen")
 	}
 }
 
