@@ -298,7 +298,7 @@ func (v View) DispBar(s tcell.Screen, file string, curr int, vi int) error {
 
 				elemOutput = f.Mode().String()
 			} else if k[1:] == "total" {
-				elemOutput = fmt.Sprintf("%d/$d", curr, len(v.Files))
+				elemOutput = fmt.Sprintf("%d/%d", curr, len(v.Files))
 			} else if k[1] == '[' && k[len(k)-1] == ']' {
 				replacedString := strings.Replace(k, "@", file, -1)
 				cmdOutput, _ := exec.Command(co.Shell, "-c", replacedString[2:len(replacedString)-1]).Output()
@@ -333,7 +333,7 @@ func (v View) DispBar(s tcell.Screen, file string, curr int, vi int) error {
 
 			fu.Addstr(s, co.BarStyle[k], x, loc, elemOutput)
 	
-			if num, _ := strconv.Atoi(string(k[0])); num != len(keys) {
+			if num, _ := strconv.Atoi(string(k[0])); num < len(keys) { // the element isn't at the end
 				fu.Addstr(s, tcell.StyleDefault.Background(co.BarBg).Foreground(co.BarFg), x+len(elemOutput), loc, co.BarDiv)
 				x += len(elemOutput + co.BarDiv)
 			} else {
