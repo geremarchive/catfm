@@ -524,10 +524,7 @@ func (v *View) Resize(s tcell.Screen, cf Catfm) (out bool) {
 		out = true
 	} else if v.Height != nh {
 		v.Width, v.Height = nw, nh
-
-		if v.Buffer1 != 0 || v.File > v.Height-(co.YBuffTop+co.YBuffBottom) {
-			v.ResetVals()
-		}
+		v.ResetVals()
 
 		err = v.DrawScreen(s, cf)
 		out = true
