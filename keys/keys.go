@@ -3,12 +3,10 @@ package keys
 import "github.com/gdamore/tcell"
 
 func MatchKey(input *tcell.EventKey, key string) bool {
-	if input.Rune() == []rune(key)[0] {
-		return true
-	} else if input.Key() == Keys[key] {
-		return true
+	if input.Key() == tcell.KeyRune {
+		return input.Rune() == []rune(key)[0]
 	} else {
-		return false
+		return input.Key() == Keys[key]
 	}
 }
 
@@ -40,7 +38,6 @@ var (
 		"ctrl-x": tcell.KeyCtrlX,
 		"ctrl-y": tcell.KeyCtrlY,
 		"ctrl-z": tcell.KeyCtrlZ,
-		"home": tcell.KeyHome,
 		"f1": tcell.KeyF1,
 		"f2": tcell.KeyF2,
 		"f3": tcell.KeyF3,
@@ -53,5 +50,6 @@ var (
 		"f10": tcell.KeyF10,
 		"f11": tcell.KeyF11,
 		"f12": tcell.KeyF12,
+		"home": tcell.KeyHome,
 	}
 )

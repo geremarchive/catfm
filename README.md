@@ -1,6 +1,6 @@
 <h1 align="center">catfm 🐟</h1>
 
-<p align="center"><img src="media/catfm-by-gmk.png"></p>
+<p align="center"><img src="media/catfm.png"></p>
 
 <p align="center">An extensible interactive shell for the UNIX operating system</p>
 
@@ -21,9 +21,7 @@
 ## Dependencies 
 
 * ```go 1.13```
-* ```tcell```
-* ```bytefmt```
-* ```copy```
+* a POSIX enviroment and shell
 
 ## Building
 
@@ -31,23 +29,7 @@
 
 ```git clone http://github.com/geremachek/catfm```
 
-**Tnstall go from your distro's repositories:**
-
-**Install tcell:**
-
-```go get github.com/gdamore/tcell```
-
-**Install bytefmt**
-
-```go get code.cloudfoundry.org/bytefmt```
-
-**Install copy**
-
-```go get github.com/otiai10/copy```
-
-**Build the program**
-
-Move into the ```catfm/``` directory and type ```go mod init``` and then ```go build```
+Move into the ```catfm/``` directory and type ```go build```
 
 **Move the binary to somewhere in your path**
 
