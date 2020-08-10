@@ -1,4 +1,4 @@
-<h1 align="center">catfm 🐟</h1>
+<h1 align="center">catfm</h1>
 
 <p align="center"><img src="media/catfm.png"></p>
 
