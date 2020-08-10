@@ -72,8 +72,7 @@ func main() {
 		input := s.PollEvent()
 
 		switch input := input.(type) {
-			case *tcell.EventKey:
-				s = session.Parse(s, input)
+			case *tcell.EventKey: s = session.Parse(s, input)
 		}
 	}
 }
