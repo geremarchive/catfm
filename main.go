@@ -73,7 +73,7 @@ func main() {
 
 		switch input := input.(type) {
 			case *tcell.EventKey:
-				session.Parse(s, input)
+				s = session.Parse(s, input)
 		}
 	}
 }

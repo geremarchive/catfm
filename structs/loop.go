@@ -6,7 +6,7 @@ import (
 	ke "catfm/keys"
 )
 
-func (cf *Catfm) Parse(s tcell.Screen, input *tcell.EventKey) {
+func (cf *Catfm) Parse(s tcell.Screen, input *tcell.EventKey) tcell.Screen {
 	if ke.MatchKey(input, co.KeyQuit) {
 		cf.Views[cf.View].Quit(s)	
 	} else if ke.MatchKey(input, co.KeyDelete) {
@@ -38,7 +38,7 @@ func (cf *Catfm) Parse(s tcell.Screen, input *tcell.EventKey) {
 	} else if ke.MatchKey(input, co.KeyUp) || input.Key() == tcell.KeyUp {
 		cf.Views[cf.View].Move(s, *cf, -1)
 	} else if ke.MatchKey(input, co.KeyRight) || input.Key() == tcell.KeyRight {
-		cf.Views[cf.View].Right(s, *cf)
+		return cf.Views[cf.View].Right(s, *cf)
 	} else if ke.MatchKey(input, co.KeyLeft) || input.Key() == tcell.KeyLeft {
 		cf.Views[cf.View].ChangeDir(s, *cf, "..")
 	} else if ke.MatchKey(input, co.KeyRefresh) {
@@ -50,9 +50,10 @@ func (cf *Catfm) Parse(s tcell.Screen, input *tcell.EventKey) {
 	} else {
 		for k, v := range co.Bindings {
 			if ke.MatchKey(input, k) {
-				s = cf.Views[cf.View].ParseBinding(s, *cf, v)
-				break
+				return cf.Views[cf.View].ParseBinding(s, *cf, v)
 			}
 		}
 	}
+
+	return s
 }

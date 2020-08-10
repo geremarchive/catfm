@@ -113,6 +113,7 @@ func (cv View) Quit(s tcell.Screen) {
 
 func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen {
 	replacedString := val[1] // store the actual command
+	var scr tcell.Screen
 
 	if len(v.Files) != 0 {
 		// if the current directory isn't empty, replace the 
@@ -140,15 +141,15 @@ func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen
 		cmd.Run()
 
 		var err error
-		s, err = tcell.NewScreen()
+		scr, err = tcell.NewScreen()
 
 		if err != nil {
 			fu.Errout(s, "couldn't initialize screen")
 		}
 
-		s.Init()
+		scr.Init()
 
-		if err := v.DrawScreen(s, cf); err != nil {
+		if err := v.DrawScreen(scr, cf); err != nil {
 			fu.Errout(s, "couldn't draw screen")
 		}
 	} else if val[0] == "g" {
@@ -156,7 +157,7 @@ func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen
 		cmd.Start()
 	}
 
-	return s
+	return scr
 }
 
 func (v View) DispFiles(s tcell.Screen, cf Catfm) error {
@@ -647,7 +648,7 @@ func (v *View) Rename(s tcell.Screen, cf Catfm) {
 /// Right
 // this will cd into a directory or open a file
 
-func (v *View) Right(s tcell.Screen, cf Catfm) {
+func (v *View) Right(s tcell.Screen, cf Catfm) tcell.Screen {
 	if len(v.Files) > 0 { // is there anything here?
 		if fu.Isd(v.Files[v.File]) { // is it a directory?
 			v.ChangeDir(s, cf, v.Files[v.File])
@@ -662,9 +663,11 @@ func (v *View) Right(s tcell.Screen, cf Catfm) {
 				}
 			}
 
-			s = v.ParseBinding(s, cf, command)
+			return v.ParseBinding(s, cf, command)
 		}
 	}
+
+	return s
 }
 
 // Refresh

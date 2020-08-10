@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	XBuff int = 1 // Blank space on sides
-	YBuffTop int = 1 // Blank space on top
-	YBuffBottom int = 3 // Blank space on bottom (remember to make room for the bar!)
+	XBuff int = 0 // Blank space on sides
+	YBuffTop int = 0 // Blank space on top
+	YBuffBottom int = 2 // Blank space on bottom (remember to make room for the bar!)
 
 	// Key bindings (arrow keys will always work for the movement functions)
 	// ctrl-a-z, home, f1-12
