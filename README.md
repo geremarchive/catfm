@@ -22,6 +22,7 @@
 
 * ```go 1.13```
 * a POSIX enviroment and shell
+* a terminal that supports cursor adressing, etc.
 
 ## Building
 
