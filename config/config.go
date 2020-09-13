@@ -71,7 +71,7 @@ var (
 	Shell string = "sh" // Shell that will be used to execute commands
 	TildeHome bool = true // replace /home/user with "~"
 	RecycleBin string = "" // the directory where "deleted" files go.
-			       // (I suggest ~/.cache/catfm)
+			       // (I suggest /home/user/.cache/catfm)
 
 	FileOpen = map[string][]string {
 		// Key is the file type, formatted like "jpg"

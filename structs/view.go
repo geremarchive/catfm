@@ -113,7 +113,7 @@ func (cv View) Quit(s tcell.Screen) {
 
 func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen {
 	replacedString := val[1] // store the actual command
-	var scr tcell.Screen = s
+	var scr tcell.Screen
 
 	if len(v.Files) != 0 {
 		// if the current directory isn't empty, replace the 
@@ -133,7 +133,7 @@ func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen
 
 	} else if val[0] == "t" {
 		cmd := exec.Command(co.Shell, "-c", replacedString)
-
+		
 		s.Fini()
 
 		cmd.Stdout = os.Stdout
@@ -611,7 +611,7 @@ func (v *View) DotToggle(s tcell.Screen, cf Catfm) {
 // Rename
 // Rename a file
 
-func (v *View) Rename(s tcell.Screen, cf Catfm) {
+func (v *View) Rename(s tcell.Screen, cf Catfm) tcell.Screen {
 	err := ioutil.WriteFile("/tmp/rename.catfm", []byte(v.Files[v.File]), 0644) // create a new temporary file containing the current file name
 
 	if err == nil { // if that was successful...
@@ -642,7 +642,8 @@ func (v *View) Rename(s tcell.Screen, cf Catfm) {
 			}
 		}
 	}
-	
+
+	return s
 }
 
 // Right

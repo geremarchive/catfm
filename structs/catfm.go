@@ -125,8 +125,10 @@ func (cf *Catfm) Recycle(s tcell.Screen) {
 		v := cf.Views[cf.View]
 
 		if err := cp.Copy(v.Files[v.File], co.RecycleBin + "/" + v.Files[v.File]); err == nil {
-			cf.Views[cf.View] = v
 			cf.RemoveFile(s)
+		} else {
+			s.Fini()
+			panic(err)
 		}
 	}
 }

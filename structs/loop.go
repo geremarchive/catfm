@@ -32,7 +32,7 @@ func (cf *Catfm) Parse(s tcell.Screen, input *tcell.EventKey) tcell.Screen {
 	} else if ke.MatchKey(input, co.KeyGoToLast) {
 		cf.Views[cf.View].GoToLast(s, *cf)
 	} else if ke.MatchKey(input, co.KeyRename) {
-		cf.Views[cf.View].Rename(s, *cf)
+		return cf.Views[cf.View].Rename(s, *cf)
 	} else if ke.MatchKey(input, co.KeyDown) || input.Key() == tcell.KeyDown {
 		cf.Views[cf.View].Move(s, *cf, 1)
 	} else if ke.MatchKey(input, co.KeyUp) || input.Key() == tcell.KeyUp {
