@@ -113,7 +113,7 @@ func (cv View) Quit(s tcell.Screen) {
 
 func (v *View) ParseBinding(s tcell.Screen, cf Catfm, val []string) tcell.Screen {
 	replacedString := val[1] // store the actual command
-	var scr tcell.Screen
+	var scr tcell.Screen = s
 
 	if len(v.Files) != 0 {
 		// if the current directory isn't empty, replace the 
